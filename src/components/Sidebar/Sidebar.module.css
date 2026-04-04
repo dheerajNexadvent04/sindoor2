@@ -102,3 +102,10 @@
         pointer-events: auto;
     }
 }
+
+@media print {
+    .sidebar,
+    .overlay {
+        display: none !important;
+    }
+}

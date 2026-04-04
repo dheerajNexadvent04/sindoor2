@@ -39,3 +39,22 @@
         flex-direction: column;
     }
 }
+
+@media print {
+    .dashboardContainer {
+        display: block;
+        min-height: auto;
+        background: #fff;
+    }
+
+    .mainContent {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        background: #fff;
+    }
+
+    .mobileHeader {
+        display: none !important;
+    }
+}

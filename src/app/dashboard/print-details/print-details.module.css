@@ -1,0 +1,317 @@
+.page {
+    display: grid;
+    gap: 18px;
+    width: 100%;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pageTitle {
+    margin: 0;
+    color: #0f172a;
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
+}
+
+.printButton {
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ef2328 0%, #db1d23 100%);
+    color: #fff;
+    height: 42px;
+    padding: 0 18px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 12px 22px rgba(227, 30, 36, 0.22);
+}
+
+.previewSheet {
+    background: #fff;
+    border: 1px solid #e8edf4;
+    border-radius: 20px;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+    padding: 24px;
+    width: 100%;
+}
+
+.sheetHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    border-bottom: 1px solid #eceff5;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+}
+
+.brandBlock {
+    display: flex;
+    align-items: flex-start;
+    min-width: 170px;
+}
+
+.headerSummary {
+    margin-left: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 12px;
+    min-width: 280px;
+}
+
+.logo {
+    object-fit: contain;
+    width: auto;
+    height: auto;
+}
+
+.headerMeta h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.35rem;
+    line-height: 1.15;
+    text-align: right;
+}
+
+.headerMeta p {
+    margin: 6px 0 0;
+    color: #475569;
+    font-weight: 600;
+    text-align: right;
+}
+
+.photoFrame {
+    width: 110px;
+    height: 110px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #dfe4ea;
+    background: #f8fafc;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.photo {
+    object-fit: cover;
+}
+
+.photoFallback {
+    width: 100%;
+    height: 100%;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.section {
+    margin-top: 14px;
+}
+
+.section h3 {
+    margin: 0 0 8px;
+    color: #111827;
+    font-size: 1.02rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
+}
+
+.grid p,
+.textBlock p {
+    margin: 0;
+    border: 1px solid #eef2f7;
+    background: #fcfdff;
+    border-radius: 10px;
+    padding: 8px 10px;
+    color: #0f172a;
+    line-height: 1.35;
+    display: grid;
+    gap: 3px;
+}
+
+.grid p span,
+.textBlock p span {
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.textBlock {
+    display: grid;
+    gap: 8px;
+}
+
+.loadingCard,
+.errorCard {
+    border-radius: 14px;
+    border: 1px solid #e6ebf2;
+    background: #fff;
+    padding: 18px;
+    color: #334155;
+    font-weight: 600;
+}
+
+.errorCard {
+    color: #b91c1c;
+    border-color: #fecaca;
+    background: #fff1f2;
+}
+
+@media (max-width: 900px) {
+    .previewSheet {
+        padding: 18px;
+        border-radius: 16px;
+    }
+
+    .sheetHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .headerSummary {
+        width: 100%;
+        justify-content: space-between;
+        min-width: 0;
+    }
+
+    .headerMeta h2,
+    .headerMeta p {
+        text-align: left;
+    }
+
+    .photoFrame {
+        width: 96px;
+        height: 96px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .toolbar {
+        margin-top: -6px;
+    }
+
+    .printButton {
+        height: 40px;
+        padding: 0 14px;
+    }
+}
+
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 8mm;
+    }
+
+    .page {
+        display: block;
+        gap: 0;
+    }
+
+    .toolbar {
+        display: none !important;
+    }
+
+    .previewSheet {
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+    }
+
+    .sheetHeader {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .sheetHeader {
+        margin-bottom: 8px;
+        padding-bottom: 10px;
+        align-items: center;
+    }
+
+    .headerSummary {
+        min-width: 0;
+        gap: 8px;
+    }
+
+    .headerMeta h2 {
+        font-size: 15pt;
+        line-height: 1.15;
+        text-align: right;
+    }
+
+    .headerMeta p {
+        margin-top: 2px;
+        font-size: 9pt;
+        text-align: right;
+    }
+
+    .photoFrame {
+        width: 76px;
+        height: 76px;
+        border-radius: 10px;
+    }
+
+    .section {
+        margin-top: 8px;
+        break-inside: auto;
+        page-break-inside: auto;
+    }
+
+    .section h3 {
+        font-size: 10.5pt;
+        margin-bottom: 5px;
+    }
+
+    .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5px 6px;
+    }
+
+    .grid p,
+    .textBlock p {
+        border-radius: 6px;
+        border-color: #e8edf4;
+        padding: 4px 6px;
+        font-size: 8.5pt;
+        line-height: 1.22;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .grid p span,
+    .textBlock p span {
+        font-size: 6.8pt;
+        letter-spacing: 0.06em;
+    }
+
+    .textBlock {
+        gap: 5px;
+    }
+
+    .loadingCard,
+    .errorCard {
+        border: none;
+        padding: 0;
+    }
+}

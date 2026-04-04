@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Home, Heart, Bell, Menu, X } from 'lucide-react';
+import { Home, Heart, Printer, X } from 'lucide-react';
 import styles from './Sidebar.module.css';
 import { usePathname } from 'next/navigation';
 
@@ -18,7 +18,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     const menuItems = [
         { name: 'Dashboard', icon: <Home size={20} />, path: '/dashboard' },
         { name: 'Matches', icon: <Heart size={20} />, path: '/dashboard/matches' },
-        { name: 'Plans', icon: <Bell size={20} />, path: '/dashboard/plans' },
+        { name: 'Print Details', icon: <Printer size={20} />, path: '/dashboard/print-details' },
     ];
 
     return (
