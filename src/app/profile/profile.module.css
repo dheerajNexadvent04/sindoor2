@@ -57,10 +57,44 @@
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 16px 32px rgba(227, 30, 36, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.filterToggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 20px 36px rgba(227, 30, 36, 0.24);
 }
 
 .chevronOpen {
     transform: rotate(180deg);
+}
+
+.floatingFilterToggle {
+    position: fixed;
+    top: 124px;
+    right: max(18px, 4vw);
+    z-index: 1045;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ef2328 0%, #db1d23 100%);
+    color: #fff;
+    padding: 12px 18px;
+    font-weight: 700;
+    box-shadow: 0 16px 30px rgba(227, 30, 36, 0.24);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.floatingFilterVisible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
 .contentShell {
@@ -166,11 +200,14 @@
 .filterPanel {
     width: min(360px, calc(100vw - 32px));
     border-radius: 24px;
-    padding: 20px;
+    padding: 20px 20px 16px;
     position: fixed;
-    top: 150px;
+    top: 122px;
     right: max(24px, 5%);
-    z-index: 45;
+    z-index: 1110;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 146px);
 }
 
 .filterPanelHeader {
@@ -211,7 +248,7 @@
     border: none;
     background: rgba(15, 23, 42, 0.26);
     backdrop-filter: blur(4px);
-    z-index: 40;
+    z-index: 1100;
 }
 
 .closeFilters {
@@ -235,6 +272,11 @@
     display: grid;
     gap: 8px;
     margin-bottom: 16px;
+}
+
+.filterScrollable {
+    overflow-y: auto;
+    padding-right: 3px;
 }
 
 .filterGroup label {
@@ -379,8 +421,13 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .floatingFilterToggle {
+        top: 110px;
+    }
+
     .filterPanel {
-        top: 120px;
+        top: 104px;
+        max-height: calc(100dvh - 122px);
     }
 }
 
@@ -403,15 +450,28 @@
         padding: 14px;
     }
 
-    .filterPanel {
+    .floatingFilterToggle {
         top: auto;
-        right: 16px;
-        left: 16px;
-        bottom: 16px;
+        right: 14px;
+        bottom: 14px;
         width: auto;
-        max-height: calc(100vh - 110px);
-        overflow-y: auto;
-        border-radius: 22px;
+        z-index: 1120;
+        padding: 13px 18px;
+    }
+
+    .filterPanel {
+        top: max(70px, env(safe-area-inset-top));
+        right: 10px;
+        left: 10px;
+        bottom: 10px;
+        width: auto;
+        max-height: none;
+        border-radius: 20px;
+        padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
+    }
+
+    .filterScrollable {
+        padding-right: 2px;
     }
 
     .cardGrid {

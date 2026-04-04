@@ -96,72 +96,93 @@ const EditProfileForm = () => {
         setLoading(false);
     }, [authProfile]);
 
+    const resolveSessionUserId = async () => {
+        const contextSessionId = session?.user?.id;
+        if (contextSessionId) return contextSessionId;
+
+        const contextUserId = user?.id;
+        if (contextUserId) return contextUserId;
+
+        const { data: { session: directSession } } = await supabase.auth.getSession();
+        return directSession?.user?.id ?? null;
+    };
+
     const fetchProfile = async (userId: string) => {
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .maybeSingle();
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .maybeSingle();
 
-            if (error) {
-                throw error;
+                if (error) {
+                    throw error;
+                }
+
+                if (data) {
+                    setPhotoUrl(data.photo_url);
+                    setPhotos(data.photos || []); // Fetch photos array
+
+                    setFormData({
+                        first_name: data.first_name || '',
+                        last_name: data.last_name || '',
+                        dob: data.date_of_birth || '',
+                        gender: data.gender || '',
+                        height: data.height ? data.height.toString() : '',
+                        weight: data.weight ? data.weight.toString() : '',
+                        marital_status: data.marital_status || '',
+                        religion_name: data.religion_name || '',
+                        caste_name: data.caste_name || '',
+                        sub_caste_name: data.sub_caste_name || '',
+                        mother_tongue: data.mother_tongue || '',
+                        manglik: data.manglik || 'no',
+                        degree: data.degree || '',
+                        occupation: data.occupation || '',
+                        employed_in: data.employed_in || '',
+                        annual_income: data.annual_income ? data.annual_income.toString() : '',
+                        complexion: data.complexion || '',
+                        body_type: data.body_type || '',
+                        blood_group: data.blood_group || '',
+                        about_me: data.about_me || '',
+                        city: data.city || '',
+                        state: data.state || '',
+                        country: data.country || 'India',
+
+                        profile_for: data.profile_for || '',
+                        managed_by: data.managed_by || '',
+                        family_type: data.family_type || '',
+                        father_occupation: data.father_occupation || '',
+                        mother_occupation: data.mother_occupation || '',
+                        brothers_total: data.brothers_total !== null ? data.brothers_total.toString() : '',
+                        brothers_married: data.brothers_married !== null ? data.brothers_married.toString() : '',
+                        sisters_total: data.sisters_total !== null ? data.sisters_total.toString() : '',
+                        sisters_married: data.sisters_married !== null ? data.sisters_married.toString() : '',
+                        native_city: data.native_city || '',
+                        family_location: data.family_location || '',
+                        about_family: data.about_family || ''
+                    });
+                    setPhotoUrl(data.photo_url);
+                    setMessage(null);
+                    setLoading(false);
+                    return;
+                }
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+                if (attempt === 0) {
+                    await supabase.auth.refreshSession();
+                }
+                if (attempt < 2) {
+                    await new Promise((resolve) => setTimeout(resolve, 220 * (attempt + 1)));
+                    continue;
+                }
+
+                if (!authProfile) {
+                    setMessage({ type: 'error', text: 'Unable to load profile data. Please refresh once.' });
+                }
             }
-
-            if (data) {
-                setPhotoUrl(data.photo_url);
-                setPhotos(data.photos || []); // Fetch photos array
-
-                setFormData({
-                    first_name: data.first_name || '',
-                    last_name: data.last_name || '',
-                    dob: data.date_of_birth || '',
-                    gender: data.gender || '',
-                    height: data.height ? data.height.toString() : '',
-                    weight: data.weight ? data.weight.toString() : '',
-                    marital_status: data.marital_status || '',
-                    religion_name: data.religion_name || '',
-                    caste_name: data.caste_name || '',
-                    sub_caste_name: data.sub_caste_name || '',
-                    mother_tongue: data.mother_tongue || '',
-                    manglik: data.manglik || 'no',
-                    degree: data.degree || '',
-                    occupation: data.occupation || '',
-                    employed_in: data.employed_in || '',
-                    annual_income: data.annual_income ? data.annual_income.toString() : '',
-                    complexion: data.complexion || '',
-                    body_type: data.body_type || '',
-                    blood_group: data.blood_group || '',
-                    about_me: data.about_me || '',
-                    city: data.city || '',
-                    state: data.state || '',
-                    country: data.country || 'India',
-
-                    profile_for: data.profile_for || '',
-                    managed_by: data.managed_by || '',
-                    family_type: data.family_type || '',
-                    father_occupation: data.father_occupation || '',
-                    mother_occupation: data.mother_occupation || '',
-                    brothers_total: data.brothers_total !== null ? data.brothers_total.toString() : '',
-                    brothers_married: data.brothers_married !== null ? data.brothers_married.toString() : '',
-                    sisters_total: data.sisters_total !== null ? data.sisters_total.toString() : '',
-                    sisters_married: data.sisters_married !== null ? data.sisters_married.toString() : '',
-                    native_city: data.native_city || '',
-                    family_location: data.family_location || '',
-                    about_family: data.about_family || ''
-                });
-                setPhotoUrl(data.photo_url);
-            } else if (!authProfile) {
-                setMessage({ type: 'error', text: 'Unable to load profile data. Please refresh once.' });
-            }
-        } catch (error) {
-            console.error('Error fetching profile:', error);
-            if (!authProfile) {
-                setMessage({ type: 'error', text: 'Unable to load profile data. Please refresh once.' });
-            }
-        } finally {
-            setLoading(false);
         }
+        setLoading(false);
     };
 
     useEffect(() => {
@@ -170,28 +191,34 @@ const EditProfileForm = () => {
 
     useEffect(() => {
         const loadProfile = async () => {
-            const contextSessionId = session?.user?.id;
-            const contextUserId = user?.id;
-            const directSessionId = (await supabase.auth.getSession()).data.session?.user?.id;
-            const resolvedUserId = contextSessionId || contextUserId || directSessionId;
-
-            if (!resolvedUserId) {
-                // Auth can hydrate slightly later after refresh; do not keep spinner forever.
-                if (!authLoading) {
-                    await refreshSession();
-                    setLoading(false);
+            const resolvedUserId = await resolveSessionUserId();
+            if (resolvedUserId) {
+                await fetchProfile(resolvedUserId);
+                if (!session?.user?.id) {
+                    void refreshSession();
                 }
+                setLoading(false);
                 return;
             }
 
-            await fetchProfile(resolvedUserId);
-            if (!contextSessionId) {
+            if (!authLoading) {
                 void refreshSession();
+                const refreshedUserId = await resolveSessionUserId();
+                if (refreshedUserId) {
+                    await fetchProfile(refreshedUserId);
+                    setLoading(false);
+                } else {
+                    setLoading(false);
+                    setMessage((currentMessage) => currentMessage ?? {
+                        type: 'error',
+                        text: 'Unable to detect an active session for profile loading.',
+                    });
+                }
             }
         };
 
         void loadProfile();
-    }, [session?.user?.id, user?.id, authLoading, refreshSession]);
+    }, [session?.user?.id, user?.id, authLoading, refreshSession, authProfile]);
 
     useEffect(() => {
         if (!loading) return;

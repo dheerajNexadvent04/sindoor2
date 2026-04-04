@@ -127,10 +127,12 @@ const scoreProfile = (candidate: SuggestedProfile, preferences: PreferencesForm)
 
 export default function ProfileGalleryPage() {
     const { user, loading: authLoading, refreshSession } = useAuth();
+    const headerCardRef = React.useRef<HTMLElement | null>(null);
     const [profile, setProfile] = React.useState<UserProfile | null>(null);
     const [matches, setMatches] = React.useState<RankedProfile[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [showFilters, setShowFilters] = React.useState(false);
+    const [showStickyFilter, setShowStickyFilter] = React.useState(false);
     const [filters, setFilters] = React.useState<LiveFilters>({
         ageMin: '',
         ageMax: '',
@@ -216,6 +218,34 @@ export default function ProfileGalleryPage() {
         void bootstrap();
     }, [authLoading, user?.id, refreshSession, loadProfiles]);
 
+    React.useEffect(() => {
+        const headerCardElement = headerCardRef.current;
+        if (!headerCardElement) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setShowStickyFilter(!entry.isIntersecting);
+            },
+            {
+                threshold: 0.2,
+            }
+        );
+
+        observer.observe(headerCardElement);
+        return () => observer.disconnect();
+    }, []);
+
+    React.useEffect(() => {
+        if (!showFilters) return;
+
+        const previousBodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = previousBodyOverflow;
+        };
+    }, [showFilters]);
+
     const filteredMatches = matches.filter((match) => {
         const age = getAge(match.date_of_birth);
         const minAge = filters.ageMin ? parseInt(filters.ageMin, 10) : null;
@@ -238,10 +268,11 @@ export default function ProfileGalleryPage() {
 
     const filtersDisabled = profile?.status !== 'approved' || matches.length === 0;
     const pendingProfile = profile?.status !== 'approved';
+    const shouldShowStickyFilterButton = showStickyFilter && !showFilters;
 
     return (
         <div className={styles.page}>
-            <section className={styles.headerCard}>
+            <section ref={headerCardRef} className={styles.headerCard}>
                 <div>
                     <p className={styles.eyebrow}>Your Matches</p>
                     <h1 className={styles.title}>View Profiles</h1>
@@ -258,6 +289,16 @@ export default function ProfileGalleryPage() {
                     <ChevronDown size={16} className={showFilters ? styles.chevronOpen : ''} />
                 </button>
             </section>
+
+            <button
+                type="button"
+                className={`${styles.floatingFilterToggle} ${shouldShowStickyFilterButton ? styles.floatingFilterVisible : ''}`}
+                onClick={() => setShowFilters(true)}
+            >
+                <Filter size={16} />
+                Filter
+                <ChevronDown size={16} />
+            </button>
 
             <section className={styles.contentShell}>
                 <div className={styles.gridShell}>
@@ -344,59 +385,61 @@ export default function ProfileGalleryPage() {
                                 </button>
                             </div>
 
-                            <div className={styles.filterGroup}>
-                                <label>Age group</label>
-                                <div className={styles.inlineFields}>
-                                    <select value={filters.ageMin} onChange={(event) => handleFilterChange('ageMin', event.target.value)} disabled={filtersDisabled}>
+                            <div className={styles.filterScrollable}>
+                                <div className={styles.filterGroup}>
+                                    <label>Age group</label>
+                                    <div className={styles.inlineFields}>
+                                        <select value={filters.ageMin} onChange={(event) => handleFilterChange('ageMin', event.target.value)} disabled={filtersDisabled}>
+                                            <option value="">Any</option>
+                                            {ageOptions.map((age) => <option key={age} value={age}>{age}</option>)}
+                                        </select>
+                                        <select value={filters.ageMax} onChange={(event) => handleFilterChange('ageMax', event.target.value)} disabled={filtersDisabled}>
+                                            <option value="">Any</option>
+                                            {ageOptions.map((age) => <option key={age} value={age}>{age}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className={styles.filterGroup}>
+                                    <label>City</label>
+                                    <div className={styles.inputWrap}>
+                                        <Search size={15} />
+                                        <input
+                                            value={filters.city}
+                                            onChange={(event) => handleFilterChange('city', event.target.value)}
+                                            placeholder="Search city"
+                                            disabled={filtersDisabled}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className={styles.filterGroup}>
+                                    <label>Height</label>
+                                    <select value={filters.heightMin} onChange={(event) => handleFilterChange('heightMin', event.target.value)} disabled={filtersDisabled}>
                                         <option value="">Any</option>
-                                        {ageOptions.map((age) => <option key={age} value={age}>{age}</option>)}
-                                    </select>
-                                    <select value={filters.ageMax} onChange={(event) => handleFilterChange('ageMax', event.target.value)} disabled={filtersDisabled}>
-                                        <option value="">Any</option>
-                                        {ageOptions.map((age) => <option key={age} value={age}>{age}</option>)}
+                                        {heightOptions.map((height) => <option key={height} value={height}>{height} cm+</option>)}
                                     </select>
                                 </div>
-                            </div>
 
-                            <div className={styles.filterGroup}>
-                                <label>City</label>
-                                <div className={styles.inputWrap}>
-                                    <Search size={15} />
+                                <div className={styles.filterGroup}>
+                                    <label>Caste / Community</label>
                                     <input
-                                        value={filters.city}
-                                        onChange={(event) => handleFilterChange('city', event.target.value)}
-                                        placeholder="Search city"
+                                        value={filters.caste}
+                                        onChange={(event) => handleFilterChange('caste', event.target.value)}
+                                        placeholder="Any"
                                         disabled={filtersDisabled}
                                     />
                                 </div>
-                            </div>
 
-                            <div className={styles.filterGroup}>
-                                <label>Height</label>
-                                <select value={filters.heightMin} onChange={(event) => handleFilterChange('heightMin', event.target.value)} disabled={filtersDisabled}>
-                                    <option value="">Any</option>
-                                    {heightOptions.map((height) => <option key={height} value={height}>{height} cm+</option>)}
-                                </select>
-                            </div>
-
-                            <div className={styles.filterGroup}>
-                                <label>Caste / Community</label>
-                                <input
-                                    value={filters.caste}
-                                    onChange={(event) => handleFilterChange('caste', event.target.value)}
-                                    placeholder="Any"
+                                <button
+                                    type="button"
+                                    className={styles.clearButton}
+                                    onClick={() => setFilters({ ageMin: '', ageMax: '', city: '', heightMin: '', caste: '' })}
                                     disabled={filtersDisabled}
-                                />
+                                >
+                                    Clear Filters
+                                </button>
                             </div>
-
-                            <button
-                                type="button"
-                                className={styles.clearButton}
-                                onClick={() => setFilters({ ageMin: '', ageMax: '', city: '', heightMin: '', caste: '' })}
-                                disabled={filtersDisabled}
-                            >
-                                Clear Filters
-                            </button>
                         </aside>
                     </>
                 )}

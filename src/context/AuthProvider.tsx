@@ -79,6 +79,8 @@ const writeCachedUser = (user: CachedUser | null) => {
     }
 };
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 interface AuthContextType {
     session: Session | null;
     user: User | null;
@@ -138,24 +140,53 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const fetchProfile = async (userId: string) => {
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('id, first_name, last_name, photo_url, photos, is_premium, gender, status')
-                .eq('id', userId)
-                .maybeSingle();
+        let lastError: unknown = null;
 
-            if (data) {
-                setProfile(data);
-                writeCachedProfile(data);
-            } else {
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('id, first_name, last_name, photo_url, photos, is_premium, gender, status')
+                    .eq('id', userId)
+                    .maybeSingle();
+
+                if (error) {
+                    throw error;
+                }
+
+                if (data) {
+                    setProfile(data);
+                    writeCachedProfile(data);
+                    return;
+                }
+
+                const cachedProfile = readCachedProfile();
+                if (cachedProfile?.id === userId) {
+                    setProfile(cachedProfile);
+                    return;
+                }
+
                 setProfile(null);
                 writeCachedProfile(null);
-                if (error) console.log("AuthProvider: Profile fetch error (likely no profile):", error.message);
+                return;
+            } catch (err) {
+                lastError = err;
+                if (attempt === 0) {
+                    await supabase.auth.refreshSession();
+                }
+                if (attempt < 2) {
+                    await wait(250 * (attempt + 1));
+                }
             }
-        } catch (err) {
-            console.error("Error in fetchProfile:", err);
         }
+
+        const cachedProfile = readCachedProfile();
+        if (cachedProfile?.id === userId) {
+            setProfile(cachedProfile);
+            return;
+        }
+
+        console.error("AuthProvider: profile fetch failed after retries:", lastError);
     };
 
     useEffect(() => {

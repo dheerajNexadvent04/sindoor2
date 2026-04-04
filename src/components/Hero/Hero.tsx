@@ -306,7 +306,7 @@ const Hero = () => {
                         A trusted matrimonial platform helping families and individuals connect with verified, faith-aligned, and serious profiles.
                     </p>
                     <div className={styles.actionButtons}>
-                        <Link href="/plans" className={styles.btnPrimary}>Our Plans</Link>
+                        <Link href="/membership" className={styles.btnPrimary}>Our Plans</Link>
                         <Link href="/contact" className={styles.btnSecondary}>Contact Us</Link>
                     </div>
                 </div>
