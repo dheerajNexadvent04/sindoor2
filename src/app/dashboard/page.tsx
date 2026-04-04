@@ -192,6 +192,7 @@ export default function Dashboard() {
             : styles.statusDisabled;
 
     const handleDeletePhoto = async (photoUrlToDelete: string) => {
+        if (!profile?.photos) return;
         if (!confirm("Are you sure you want to delete this photo?")) return;
 
         try {
@@ -206,7 +207,7 @@ export default function Dashboard() {
             if (error) throw error;
 
             // Optimistic update
-            setProfile({ ...profile, photos: updatedPhotos, photo_url: nextPrimaryPhoto });
+            setProfile((currentProfile) => currentProfile ? { ...currentProfile, photos: updatedPhotos, photo_url: nextPrimaryPhoto } : currentProfile);
         } catch (error) {
             console.error("Error deleting photo:", error);
             alert("Failed to delete photo. Please try again.");

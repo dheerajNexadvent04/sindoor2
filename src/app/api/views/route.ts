@@ -2,9 +2,19 @@ import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
+type ViewerRelation = { id: string | null } | { id: string | null }[] | null;
+
 const viewProfileSchema = z.object({
     viewedProfileId: z.string().uuid()
 });
+
+const getViewerProfileId = (viewerProfile: ViewerRelation) => {
+    if (Array.isArray(viewerProfile)) {
+        return viewerProfile[0]?.id ?? null;
+    }
+
+    return viewerProfile?.id ?? null;
+};
 
 export async function POST(request: Request) {
     try {
@@ -84,7 +94,7 @@ export async function GET(request: Request) {
         if (error) throw error;
 
         const viewerIds = (data ?? [])
-            .map((item) => item.viewer_profile?.id)
+            .map((item) => getViewerProfileId(item.viewer_profile as ViewerRelation))
             .filter((id): id is string => Boolean(id));
 
         if (viewerIds.length === 0) {
@@ -104,7 +114,10 @@ export async function GET(request: Request) {
             success: true,
             data: (data ?? []).map((item) => ({
                 viewed_at: item.viewed_at,
-                viewer_profile: item.viewer_profile?.id ? profileMap.get(item.viewer_profile.id) ?? null : null,
+                viewer_profile: (() => {
+                    const viewerId = getViewerProfileId(item.viewer_profile as ViewerRelation);
+                    return viewerId ? profileMap.get(viewerId) ?? null : null;
+                })(),
             })),
         });
     } catch (error: unknown) {

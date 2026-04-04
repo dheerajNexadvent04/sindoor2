@@ -43,6 +43,7 @@ const Navbar = () => {
     const displayName = profile
         ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
         : ((session?.user?.email || user?.email)?.split('@')[0] || 'My Account');
+    const primaryPhoto = profile?.photo_url || profile?.photos?.[0] || null;
 
     const normalizedStatus = profile?.status === 'approved'
         ? 'Approved'
@@ -93,9 +94,9 @@ const Navbar = () => {
                         {isAuthenticated ? (
                             <Link href="/dashboard" className={styles.accountBadge}>
                                 <div className={styles.userImageContainer}>
-                                    {profile?.photo_url || (profile?.photos && profile.photos[0]) ? (
+                                    {primaryPhoto ? (
                                         <Image
-                                            src={profile.photo_url || profile.photos[0] || "/image 1.png"}
+                                            src={primaryPhoto}
                                             alt="User"
                                             fill
                                             className={styles.userImage}
@@ -165,9 +166,9 @@ const Navbar = () => {
                         {isAuthenticated ? (
                             <Link href="/dashboard" className={styles.accountBadge} onClick={toggleMobileMenu}>
                                 <div className={styles.userImageContainer}>
-                                    {profile?.photo_url || (profile?.photos && profile.photos[0]) ? (
+                                    {primaryPhoto ? (
                                         <Image
-                                            src={profile.photo_url || profile.photos[0] || "/image 1.png"}
+                                            src={primaryPhoto}
                                             alt="User"
                                             fill
                                             className={styles.userImage}
