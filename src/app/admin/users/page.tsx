@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Search, Check, X } from 'lucide-react';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
 
 type UserProfile = {
     id: string;
@@ -26,7 +25,6 @@ export default function UserManagement() {
     const [filter, setFilter] = useState('all'); // all, pending, approved
     const [search, setSearch] = useState('');
     const supabase = createClient();
-    const searchParams = useSearchParams();
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -58,11 +56,14 @@ export default function UserManagement() {
     };
 
     useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const searchParams = new URLSearchParams(window.location.search);
         const statusFromQuery = searchParams.get('status');
         if (statusFromQuery === 'pending' || statusFromQuery === 'approved' || statusFromQuery === 'all') {
             setFilter(statusFromQuery);
         }
-    }, [searchParams]);
+    }, []);
 
     useEffect(() => {
         void fetchUsers();
