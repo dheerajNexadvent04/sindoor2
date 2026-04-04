@@ -14,7 +14,6 @@ interface DashboardProfile {
     last_name: string | null;
     photo_url: string | null;
     photos: string[] | null;
-    is_premium: boolean | null;
     gender: string | null;
     status?: string | null;
 }
@@ -27,22 +26,6 @@ interface InterestedProfile {
     city: string | null;
     state: string | null;
 }
-
-const getAge = (dateOfBirth: string | null) => {
-    if (!dateOfBirth) return 'N/A';
-    const dob = new Date(dateOfBirth);
-    if (Number.isNaN(dob.getTime())) return 'N/A';
-
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const monthDiff = today.getMonth() - dob.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-        age--;
-    }
-
-    return age;
-};
 
 export default function Dashboard() {
     const { user, profile: authProfile, loading, refreshSession } = useAuth();
@@ -190,11 +173,23 @@ export default function Dashboard() {
     }, [user?.id]);
 
     const resolvedProfile = profile || authProfile;
-    const isPremium = resolvedProfile?.is_premium || false;
     const isApprovedProfile = profile?.status === 'approved';
     const displayName = resolvedProfile
         ? `${resolvedProfile.first_name || ''} ${resolvedProfile.last_name || ''}`.trim() || 'Valued Member'
         : user?.email?.split('@')[0] || 'My Account';
+    const normalizedStatus = resolvedProfile?.status === 'approved'
+        ? 'Approved'
+        : resolvedProfile?.status === 'pending'
+            ? 'Pending'
+            : resolvedProfile?.status
+                ? 'Disabled'
+                : 'Pending';
+
+    const statusClassName = normalizedStatus === 'Approved'
+        ? styles.statusApproved
+        : normalizedStatus === 'Pending'
+            ? styles.statusPending
+            : styles.statusDisabled;
 
     const handleDeletePhoto = async (photoUrlToDelete: string) => {
         if (!confirm("Are you sure you want to delete this photo?")) return;
@@ -228,7 +223,7 @@ export default function Dashboard() {
     return (
         <>
             {/* Header (User Widget) */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+            <div className={styles.userWidgetRow}>
                 <div className={styles.userWidget}>
                     <div className={styles.userImageContainer}>
                         {resolvedProfile?.photo_url || resolvedProfile?.photos?.[0] ? (
@@ -247,22 +242,20 @@ export default function Dashboard() {
                         <span className={styles.userWidgetName}>
                             {displayName}
                         </span>
-                        <span className={styles.userWidgetRole}>{isPremium ? 'Premium Member' : 'Free Member'}</span>
+                        <span className={`${styles.userWidgetRole} ${statusClassName}`}>{normalizedStatus}</span>
                     </div>
-                    {/* Link to Edit Profile */}
-                    <Link href="/dashboard/edit-profile">
-                        <div style={{ background: '#E31E24', padding: '5px', borderRadius: '50%', color: 'white', display: 'flex', cursor: 'pointer', marginLeft: '10px' }}>
+
+                    <div className={styles.userWidgetActions}>
+                        <Link href="/dashboard/edit-profile" className={styles.editProfileBtn}>
                             <Edit size={14} />
-                        </div>
-                    </Link>
-                    {/* Logout Button */}
-                    <button 
-                        onClick={async () => { await signOut(); window.location.href = '/'; }}
-                        className={styles.logoutBtn}
-                        style={{ marginLeft: '10px' }}
-                    >
-                        Logout
-                    </button>
+                        </Link>
+                        <button
+                            onClick={async () => { await signOut(); window.location.href = '/'; }}
+                            className={styles.logoutBtn}
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
             </div>
 

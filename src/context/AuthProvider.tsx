@@ -11,6 +11,7 @@ interface UserProfile {
     photos: string[] | null;
     is_premium: boolean | null;
     gender: string | null;
+    status: string | null;
 }
 
 interface AuthContextType {
@@ -84,7 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('first_name, last_name, photo_url, photos, is_premium, gender')
+                .select('first_name, last_name, photo_url, photos, is_premium, gender, status')
                 .eq('id', userId)
                 .maybeSingle();
 

@@ -95,33 +95,44 @@ export default function UserManagement() {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setFilter('all')}
-                        className={`px-4 py-2 rounded ${filter === 'all' ? 'bg-gray-800 text-white' : 'bg-white text-gray-700'}`}
-                    >
-                        All
-                    </button>
-                    <button
-                        onClick={() => setFilter('pending')}
-                        className={`px-4 py-2 rounded ${filter === 'pending' ? 'bg-orange-500 text-white' : 'bg-white text-orange-500 border border-orange-500'}`}
-                    >
-                        Pending
-                    </button>
-                    <button
-                        onClick={() => setFilter('approved')}
-                        className={`px-4 py-2 rounded ${filter === 'approved' ? 'bg-green-500 text-white' : 'bg-white text-green-500 border border-green-500'}`}
-                    >
-                        Approved
-                    </button>
+            <div className="mb-8 rounded-[30px] border border-red-100 bg-[linear-gradient(135deg,#fff8f7_0%,#fff_56%,#fff4ef_100%)] p-8 shadow-[0_18px_42px_rgba(227,30,36,0.08)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-red-500">Profiles</p>
+                <div className="mt-3 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-900">User Management</h1>
+                        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Review profile quality, move applications across approval states, and open individual records for deeper edits.</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setFilter('all')}
+                            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${filter === 'all' ? 'bg-slate-900 text-white shadow-[0_14px_30px_rgba(15,23,42,0.18)]' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'}`}
+                        >
+                            All
+                        </button>
+                        <button
+                            onClick={() => setFilter('pending')}
+                            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${filter === 'pending' ? 'bg-orange-500 text-white shadow-[0_14px_30px_rgba(249,115,22,0.22)]' : 'bg-white text-orange-600 border border-orange-200 hover:border-orange-300'}`}
+                        >
+                            Pending
+                        </button>
+                        <button
+                            onClick={() => setFilter('approved')}
+                            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${filter === 'approved' ? 'bg-green-500 text-white shadow-[0_14px_30px_rgba(34,197,94,0.22)]' : 'bg-white text-green-600 border border-green-200 hover:border-green-300'}`}
+                        >
+                            Approved
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="flex justify-between items-center mb-6">
+                <div className="flex gap-2">
+                </div>
+            </div>
+
+            <div className="overflow-hidden rounded-[28px] border border-red-100 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
                 {/* Search Bar */}
-                <div className="p-4 border-b border-gray-100 flex items-center gap-2">
+                <div className="flex items-center gap-2 border-b border-red-50 bg-[#fffaf9] p-5">
                     <Search className="text-gray-400 w-5 h-5" />
                     <input
                         type="text"
@@ -135,7 +146,7 @@ export default function UserManagement() {
                 {/* Table */}
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm text-gray-600">
-                        <thead className="bg-gray-50 text-gray-800 font-semibold uppercase tracking-wider text-xs">
+                        <thead className="bg-[#fff7f5] text-gray-800 font-semibold uppercase tracking-wider text-xs">
                             <tr>
                                 <th className="px-6 py-4">User</th>
                                 <th className="px-6 py-4">Status</th>
@@ -150,11 +161,11 @@ export default function UserManagement() {
                                 <tr><td colSpan={4} className="px-6 py-8 text-center">No users found.</td></tr>
                             ) : (
                                 filteredUsers.map((user) => (
-                                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={user.id} className="transition-colors hover:bg-[#fffaf9]">
                                         <td className="px-6 py-4">
                                             <a href={`/admin/users/${user.id}`} className="block group">
                                                 <div className="flex items-center gap-3 group-hover:opacity-80 transition-opacity">
-                                                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden relative">
+                                                    <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-gray-100 ring-1 ring-red-100">
                                                         {user.photo_url ? (
                                                             <Image src={user.photo_url} alt="User" fill className="object-cover" unoptimized />
                                                         ) : (
@@ -169,7 +180,7 @@ export default function UserManagement() {
                                             </a>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                                            <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold capitalize
                             ${user.status === 'approved' ? 'bg-green-100 text-green-800' :
                                                     user.status === 'pending' ? 'bg-orange-100 text-orange-800' :
                                                         'bg-red-100 text-red-800'}`}>
@@ -185,7 +196,7 @@ export default function UserManagement() {
                                                 {user.status !== 'approved' && (
                                                     <button
                                                         onClick={() => handleStatusChange(user.id, 'approved')}
-                                                        className="p-1.5 bg-green-50 text-green-600 rounded hover:bg-green-100" title="Approve"
+                                                        className="rounded-xl bg-green-50 p-2 text-green-600 hover:bg-green-100" title="Approve"
                                                     >
                                                         <Check className="w-4 h-4" />
                                                     </button>
@@ -195,7 +206,7 @@ export default function UserManagement() {
                                                 {user.status !== 'rejected' && (
                                                     <button
                                                         onClick={() => handleStatusChange(user.id, 'rejected')}
-                                                        className="p-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100" title="Reject"
+                                                        className="rounded-xl bg-red-50 p-2 text-red-600 hover:bg-red-100" title="Reject"
                                                     >
                                                         <X className="w-4 h-4" />
                                                     </button>

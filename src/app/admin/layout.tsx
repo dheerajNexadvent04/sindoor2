@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
@@ -8,7 +9,6 @@ import {
     LayoutDashboard,
     Users,
     LogOut,
-    ShieldCheck,
     Menu,
     X
 } from 'lucide-react';
@@ -31,48 +31,56 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     ];
 
     return (
-        <div className="min-h-screen bg-gray-100 flex">
+        <div className="min-h-screen bg-[linear-gradient(180deg,#fff8f7_0%,#fffdfb_38%,#f7f8fb_100%)] flex">
             {/* Sidebar */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-200 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                    } lg:relative lg:translate-x-0 flex flex-col`}
+                className={`fixed inset-y-0 left-0 z-50 w-72 border-r border-red-100/70 bg-[linear-gradient(180deg,#fff7f6_0%,#fff_34%,#fff4f2_100%)] text-slate-800 transform transition-transform duration-200 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                    } lg:relative lg:translate-x-0 flex flex-col shadow-[0_18px_60px_rgba(227,30,36,0.08)]`}
             >
-                <div className="h-16 flex items-center justify-between px-6 bg-slate-950">
-                    <div className="flex items-center gap-2 font-bold text-xl">
-                        <ShieldCheck className="text-red-500" />
-                        <span>Sindoor Admin</span>
+                <div className="border-b border-red-100/80 px-6 py-6">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center">
+                            <Image
+                                src="/logo 1.png"
+                                alt="Sindoor Saubhagya"
+                                width={92}
+                                height={64}
+                                className="h-auto w-auto object-contain"
+                                priority
+                            />
+                        </div>
+                        <button
+                            className="lg:hidden text-slate-400 hover:text-slate-700"
+                            onClick={() => setIsSidebarOpen(false)}
+                        >
+                            <X size={20} />
+                        </button>
                     </div>
-                    <button
-                        className="lg:hidden text-gray-400 hover:text-white"
-                        onClick={() => setIsSidebarOpen(false)}
-                    >
-                        <X size={20} />
-                    </button>
                 </div>
 
-                <nav className="flex-1 py-6 px-3 space-y-1">
+                <nav className="flex-1 px-4 py-8 space-y-2">
                     {navItems.map((item) => {
                         const isActive = pathname.startsWith(item.href);
                         return (
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${isActive
-                                        ? 'bg-red-600 text-white'
-                                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                                className={`group flex items-center rounded-2xl px-4 py-3.5 text-sm font-medium transition-all ${isActive
+                                        ? 'bg-red-600 text-white shadow-[0_18px_30px_rgba(227,30,36,0.22)]'
+                                        : 'text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-[0_14px_28px_rgba(15,23,42,0.06)]'
                                     }`}
                             >
-                                <item.icon className="mr-3 h-5 w-5" />
+                                <item.icon className={`mr-3 h-5 w-5 ${isActive ? 'text-white' : 'text-red-500 group-hover:text-red-600'}`} />
                                 {item.label}
                             </Link>
                         );
                     })}
                 </nav>
 
-                <div className="p-4 border-t border-slate-800">
+                <div className="mt-auto border-t border-red-100/80 p-4">
                     <button
                         onClick={handleLogout}
-                        className="flex items-center w-full px-4 py-2 text-sm font-medium text-slate-300 rounded-md hover:bg-slate-800 hover:text-white transition-colors"
+                        className="flex w-full items-center rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
                     >
                         <LogOut className="mr-3 h-5 w-5" />
                         Sign Out
@@ -83,14 +91,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 {/* Mobile Header */}
-                <header className="lg:hidden bg-white shadow-sm h-16 flex items-center px-4">
+                <header className="lg:hidden flex h-16 items-center bg-white/90 px-4 shadow-sm backdrop-blur">
                     <button
                         onClick={() => setIsSidebarOpen(true)}
-                        className="text-gray-500 hover:text-gray-700"
+                        className="text-slate-500 hover:text-slate-700"
                     >
                         <Menu size={24} />
                     </button>
-                    <span className="ml-4 font-semibold text-gray-900">Admin Portal</span>
+                    <div className="ml-4 flex items-center">
+                        <Image
+                            src="/logo 1.png"
+                            alt="Sindoor Saubhagya"
+                            width={76}
+                            height={42}
+                            className="h-10 w-auto object-contain"
+                        />
+                    </div>
                 </header>
 
                 <main className="flex-1 overflow-y-auto p-4 lg:p-8">

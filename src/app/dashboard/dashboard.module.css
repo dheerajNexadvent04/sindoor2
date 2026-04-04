@@ -239,13 +239,20 @@
 }
 
 /* User Profile Widget */
+.userWidgetRow {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
 .userWidget {
     background: #FFF0F1;
-    padding: 10px 20px;
+    padding: 12px 16px;
     border-radius: 40px;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 14px;
+    max-width: 100%;
 }
 
 .userImageContainer {
@@ -270,18 +277,42 @@
 }
 
 .userWidgetInfo {
-    text-align: right;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    flex: 1;
 }
 
 .userWidgetName {
-    font-weight: 600;
+    font-weight: 700;
     color: #333;
     display: block;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    max-width: 190px;
+    word-break: break-word;
 }
 
 .userWidgetRole {
-    font-size: 0.8rem;
+    font-size: 0.88rem;
     color: #E31E24;
+    font-weight: 700;
+    margin-top: 4px;
+    text-align: left;
+}
+
+.statusApproved {
+    color: #15803d;
+}
+
+.statusPending {
+    color: #c2410c;
+}
+
+.statusDisabled {
+    color: #4b5563;
 }
 
 .logoutBtn {
@@ -298,6 +329,27 @@
 .logoutBtn:hover {
     border-color: #E31E24;
     color: #E31E24;
+}
+
+.userWidgetActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.editProfileBtn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #E31E24;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 10px 18px rgba(227, 30, 36, 0.18);
 }
 
 /* Mobile Responsiveness */
@@ -317,6 +369,71 @@
 
     .recommendationsGrid {
         grid-template-columns: 1fr;
+    }
+
+    .userWidgetRow {
+        justify-content: stretch;
+    }
+
+    .userWidget {
+        width: 100%;
+        padding: 14px;
+        border-radius: 28px;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .userImageContainer {
+        width: 56px;
+        height: 56px;
+    }
+
+    .userWidgetName {
+        max-width: none;
+        font-size: 0.92rem;
+    }
+
+    .userWidgetRole {
+        font-size: 0.84rem;
+    }
+
+    .userWidgetActions {
+        gap: 8px;
+    }
+
+    .logoutBtn {
+        margin-left: 0;
+        padding: 8px 14px;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 520px) {
+    .userWidget {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        row-gap: 10px;
+        column-gap: 12px;
+    }
+
+    .userWidgetInfo {
+        align-self: center;
+    }
+
+    .userWidgetActions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .editProfileBtn {
+        width: 36px;
+        height: 36px;
+        align-self: center;
+    }
+
+    .logoutBtn {
+        padding: 8px 12px;
     }
 }
 

@@ -25,6 +25,7 @@
     align-items: center;
     padding: 1rem 5%;
     height: 80px;
+    gap: 18px;
 }
 
 .logoContainer {
@@ -41,6 +42,8 @@
 .navLinks {
     display: flex;
     gap: 2rem;
+    justify-content: center;
+    flex: 1;
 }
 
 .navLink {
@@ -58,6 +61,8 @@
     display: flex;
     gap: 1rem;
     align-items: center;
+    justify-content: flex-end;
+    min-width: 220px;
 }
 
 .btnLogin {
@@ -81,36 +86,41 @@
     height: 40px;
 }
 
-.userWidget {
-    background: #FFF0F1;
-    padding: 6px 16px;
-    border-radius: 40px;
+.accountBadge {
+    min-width: 208px;
+    max-width: 226px;
+    background: linear-gradient(135deg, rgba(255, 252, 252, 0.98) 0%, rgba(255, 247, 247, 0.96) 100%);
+    padding: 7px 12px;
+    border-radius: 999px;
     display: flex;
     align-items: center;
     gap: 10px;
     text-decoration: none;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(227, 30, 36, 0.1);
+    transition: all 0.25s ease;
+    border: 1px solid rgba(227, 30, 36, 0.14);
+    box-shadow: 0 12px 28px rgba(227, 30, 36, 0.08);
+    backdrop-filter: blur(10px);
 }
 
-.userWidget:hover {
-    background: #FFE5E7;
+.accountBadge:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(227, 30, 36, 0.1);
+    box-shadow: 0 16px 32px rgba(227, 30, 36, 0.12);
+    border-color: rgba(227, 30, 36, 0.22);
 }
 
 .userImageContainer {
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     overflow: hidden;
     position: relative;
-    border: 1.5px solid white;
-    background: #eee;
+    border: 1.5px solid rgba(255, 255, 255, 0.95);
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
 .userImage {
@@ -122,41 +132,44 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    min-width: 0;
 }
 
 .userWidgetName {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #333;
-    line-height: 1.2;
-    max-width: 120px;
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.1;
+    max-width: 148px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-transform: lowercase;
 }
 
-.userWidgetRole {
-    font-size: 0.7rem;
-    color: #E31E24;
-    font-weight: 500;
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: 3px;
+    padding: 0;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: transparent;
 }
 
-.btnLogoutSmall {
-    background: none;
-    border: 1px solid #ccc;
-    color: #666;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    cursor: pointer;
-    margin-left: 5px;
-    transition: all 0.2s;
+.statusApproved {
+    color: #15803d;
 }
 
-.btnLogoutSmall:hover {
-    border-color: #E31E24;
-    color: #E31E24;
-    background: white;
+.statusPending {
+    color: #c2410c;
+}
+
+.statusDisabled {
+    color: #4b5563;
 }
 
 .btnLogin {
@@ -278,4 +291,10 @@
 .mobileAuthButtons button {
     width: 100%;
     padding: 12px;
+}
+
+.mobileAuthButtons .accountBadge {
+    width: 100%;
+    max-width: none;
+    justify-content: flex-start;
 }

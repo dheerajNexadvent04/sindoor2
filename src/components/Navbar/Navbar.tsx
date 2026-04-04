@@ -12,16 +12,10 @@ import { supabase } from '@/lib/supabase';
 
 const Navbar = () => {
     const { openLogin } = useModal();
-    const { session, user, profile, loading: authLoading, signOut, refreshSession } = useAuth();
+    const { session, user, profile, loading: authLoading, refreshSession } = useAuth();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
     const isAuthenticated = Boolean(session?.user || user);
-
-    const handleLogout = async () => {
-        console.log("Navbar: Logging out...");
-        await signOut();
-        window.location.href = '/';
-    };
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -45,6 +39,24 @@ const Navbar = () => {
     if (pathname?.startsWith('/admin') || pathname?.startsWith('/dashboard')) {
         return null;
     }
+
+    const displayName = profile
+        ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
+        : ((session?.user?.email || user?.email)?.split('@')[0] || 'My Account');
+
+    const normalizedStatus = profile?.status === 'approved'
+        ? 'Approved'
+        : profile?.status === 'pending'
+            ? 'Pending'
+            : profile?.status
+                ? 'Disabled'
+                : 'Pending';
+
+    const statusClassName = normalizedStatus === 'Approved'
+        ? styles.statusApproved
+        : normalizedStatus === 'Pending'
+            ? styles.statusPending
+            : styles.statusDisabled;
 
     return (
         <>
@@ -73,45 +85,31 @@ const Navbar = () => {
                         <Link href="/membership" className={styles.navLink}>Membership</Link>
                         <Link href="/about" className={styles.navLink}>About Us</Link>
                         {isAuthenticated && <Link href="/profile" className={styles.navLink}>View Profile</Link>}
+                        <Link href="/contact" className={styles.navLink}>Contact Us</Link>
                     </div>
 
                     {/* Desktop Auth Buttons / User Profile */}
                     <div className={styles.authButtons}>
                         {isAuthenticated ? (
-                            <div className={styles.userWidget}>
-                                <Link href="/dashboard" className={styles.userWidget} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                    <div className={styles.userImageContainer}>
-                                        {profile?.photo_url || (profile?.photos && profile.photos[0]) ? (
-                                            <Image
-                                                src={profile.photo_url || profile.photos[0] || "/image 1.png"}
-                                                alt="User"
-                                                fill
-                                                className={styles.userImage}
-                                                unoptimized
-                                            />
-                                        ) : (
-                                            <User size={20} color="#999" />
-                                        )}
-                                    </div>
-                                    <div className={styles.userWidgetInfo}>
-                                        <span className={styles.userWidgetName}>
-                                            {profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : ((session?.user?.email || user?.email)?.split('@')[0] || 'My Account')}
-                                        </span>
-                                        <span className={styles.userWidgetRole}>{profile?.is_premium ? 'Premium' : 'Free Member'}</span>
-                                    </div>
-                                </Link>
-                                <button
-                                    type="button"
-                                    className={styles.btnLogoutSmall}
-                                    onClick={async (e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        await handleLogout();
-                                    }}
-                                >
-                                    Logout
-                                </button>
-                            </div>
+                            <Link href="/dashboard" className={styles.accountBadge}>
+                                <div className={styles.userImageContainer}>
+                                    {profile?.photo_url || (profile?.photos && profile.photos[0]) ? (
+                                        <Image
+                                            src={profile.photo_url || profile.photos[0] || "/image 1.png"}
+                                            alt="User"
+                                            fill
+                                            className={styles.userImage}
+                                            unoptimized
+                                        />
+                                    ) : (
+                                        <User size={22} color="#999" />
+                                    )}
+                                </div>
+                                <div className={styles.userWidgetInfo}>
+                                    <span className={styles.userWidgetName}>{displayName || 'My Account'}</span>
+                                    <span className={`${styles.statusBadge} ${statusClassName}`}>{normalizedStatus}</span>
+                                </div>
+                            </Link>
                         ) : (
                             <>
                                 <button className={styles.btnLogin} onClick={openLogin}>Login</button>
@@ -160,45 +158,30 @@ const Navbar = () => {
                         <Link href="/membership" className={styles.mobileNavLink} onClick={toggleMobileMenu}>Membership</Link>
                         <Link href="/about" className={styles.mobileNavLink} onClick={toggleMobileMenu}>About Us</Link>
                         {isAuthenticated && <Link href="/profile" className={styles.mobileNavLink} onClick={toggleMobileMenu}>View Profile</Link>}
+                        <Link href="/contact" className={styles.mobileNavLink} onClick={toggleMobileMenu}>Contact Us</Link>
                     </div>
 
                     <div className={styles.mobileAuthButtons}>
                         {isAuthenticated ? (
-                            <div className={styles.userWidget}>
-                                <Link href="/dashboard" className={styles.userWidget} onClick={toggleMobileMenu} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                    <div className={styles.userImageContainer}>
-                                        {profile?.photo_url || (profile?.photos && profile.photos[0]) ? (
-                                            <Image
-                                                src={profile.photo_url || profile.photos[0] || "/image 1.png"}
-                                                alt="User"
-                                                fill
-                                                className={styles.userImage}
-                                                unoptimized
-                                            />
-                                        ) : (
-                                            <User size={20} color="#999" />
-                                        )}
-                                    </div>
-                                    <div className={styles.userWidgetInfo}>
-                                        <span className={styles.userWidgetName}>
-                                            {profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : ((session?.user?.email || user?.email)?.split('@')[0] || 'My Account')}
-                                        </span>
-                                        <span className={styles.userWidgetRole}>{profile?.is_premium ? 'Premium' : 'Free Member'}</span>
-                                    </div>
-                                </Link>
-                                <button
-                                    type="button"
-                                    className={styles.btnLogoutSmall}
-                                    onClick={async (e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        setIsMobileMenuOpen(false);
-                                        await handleLogout();
-                                    }}
-                                >
-                                    Logout
-                                </button>
-                            </div>
+                            <Link href="/dashboard" className={styles.accountBadge} onClick={toggleMobileMenu}>
+                                <div className={styles.userImageContainer}>
+                                    {profile?.photo_url || (profile?.photos && profile.photos[0]) ? (
+                                        <Image
+                                            src={profile.photo_url || profile.photos[0] || "/image 1.png"}
+                                            alt="User"
+                                            fill
+                                            className={styles.userImage}
+                                            unoptimized
+                                        />
+                                    ) : (
+                                        <User size={22} color="#999" />
+                                    )}
+                                </div>
+                                <div className={styles.userWidgetInfo}>
+                                    <span className={styles.userWidgetName}>{displayName || 'My Account'}</span>
+                                    <span className={`${styles.statusBadge} ${statusClassName}`}>{normalizedStatus}</span>
+                                </div>
+                            </Link>
                         ) : (
                             <>
                                 <button className={styles.btnLogin} onClick={() => { openLogin(); toggleMobileMenu(); }}>Login</button>

@@ -3,14 +3,13 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
-import { Users, UserPlus, Image as ImageIcon, CheckCircle } from 'lucide-react';
+import { Users, UserPlus, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState({
         totalUsers: 0,
         pendingProfiles: 0,
-        pendingPhotos: 0,
         approvedProfiles: 0
     });
     const [loading, setLoading] = useState(true);
@@ -42,8 +41,7 @@ export default function AdminDashboard() {
             setStats({
                 totalUsers: totalUsers || 0,
                 pendingProfiles: pendingProfiles || 0,
-                approvedProfiles: approvedProfiles || 0,
-                pendingPhotos: 0
+                approvedProfiles: approvedProfiles || 0
             });
         } catch (error) {
             console.error('Error fetching stats:', error);
@@ -84,89 +82,82 @@ export default function AdminDashboard() {
     }, [supabase]);
 
     if (loading) {
-        return <div className="p-8 text-center text-gray-500">Loading dashboard stats...</div>;
+        return <div className="rounded-[28px] border border-red-100 bg-white p-10 text-center text-slate-500 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">Loading dashboard stats...</div>;
     }
 
     return (
         <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard Overview</h1>
+            <div className="mb-8 rounded-[30px] border border-red-100 bg-[linear-gradient(135deg,#fff8f7_0%,#fff_56%,#fff3ed_100%)] p-8 shadow-[0_18px_42px_rgba(227,30,36,0.08)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-red-500">Admin overview</p>
+                <h1 className="mt-3 text-3xl font-bold text-slate-900">Dashboard Overview</h1>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Track profile approvals, monitor account growth, and move between user operations with the same polished brand feel as the public website.</p>
+            </div>
 
             {errorMessage && (
-                <div className="mb-6 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                     {errorMessage}
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {/* Pending Approvals Card */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-orange-100 border-l-4 border-l-orange-500">
-                    <div className="flex items-center justify-between">
+                <div className="flex h-full flex-col rounded-[26px] border border-orange-100 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.06)]">
+                    <div className="flex items-start justify-between gap-4">
                         <div>
-                            <p className="text-sm text-gray-500 uppercase font-semibold">Pending Profiles</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{stats.pendingProfiles}</p>
+                            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Pending Profiles</p>
+                            <p className="mt-2 text-3xl font-bold text-gray-800">{stats.pendingProfiles}</p>
                         </div>
-                        <div className="p-3 bg-orange-50 rounded-full">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50">
                             <UserPlus className="w-6 h-6 text-orange-500" />
                         </div>
                     </div>
                     <Link
                         href="/admin/users?status=pending"
-                        className="text-sm text-orange-600 font-medium mt-4 inline-block hover:underline"
+                        className="mt-auto pt-8 text-sm font-medium text-orange-600 hover:underline"
                     >
                         Review Applications &rarr;
                     </Link>
                 </div>
 
                 {/* Total Users Card */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-blue-100 border-l-4 border-l-blue-500">
-                    <div className="flex items-center justify-between">
+                <div className="flex h-full flex-col rounded-[26px] border border-blue-100 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.06)]">
+                    <div className="flex items-start justify-between gap-4">
                         <div>
-                            <p className="text-sm text-gray-500 uppercase font-semibold">Total Users</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{stats.totalUsers}</p>
+                            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Total Users</p>
+                            <p className="mt-2 text-3xl font-bold text-gray-800">{stats.totalUsers}</p>
                         </div>
-                        <div className="p-3 bg-blue-50 rounded-full">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
                             <Users className="w-6 h-6 text-blue-500" />
                         </div>
                     </div>
                     <Link
                         href="/admin/users"
-                        className="text-sm text-blue-600 font-medium mt-4 inline-block hover:underline"
+                        className="mt-auto pt-8 text-sm font-medium text-blue-600 hover:underline"
                     >
                         View All Users &rarr;
                     </Link>
                 </div>
 
-                {/* Examples of other cards */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-green-100 border-l-4 border-l-green-500">
-                    <div className="flex items-center justify-between">
+                <div className="flex h-full flex-col rounded-[26px] border border-green-100 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.06)]">
+                    <div className="flex items-start justify-between gap-4">
                         <div>
-                            <p className="text-sm text-gray-500 uppercase font-semibold">Approved Profiles</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{stats.approvedProfiles}</p>
+                            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Approved Profiles</p>
+                            <p className="mt-2 text-3xl font-bold text-gray-800">{stats.approvedProfiles}</p>
                         </div>
-                        <div className="p-3 bg-green-50 rounded-full">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50">
                             <CheckCircle className="w-6 h-6 text-green-500" />
                         </div>
                     </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-purple-100 border-l-4 border-l-purple-500">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-500 uppercase font-semibold">Pending Photos</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{stats.pendingPhotos}</p>
-                        </div>
-                        <div className="p-3 bg-purple-50 rounded-full">
-                            <ImageIcon className="w-6 h-6 text-purple-500" />
-                        </div>
+                    <div className="mt-auto pt-8 text-sm font-medium text-green-600">
+                        Approved and visible to users
                     </div>
-                    <span className="text-sm text-gray-400 mt-4 inline-block italic">Coming Soon</span>
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h3>
-                <div className="flex gap-4">
-                    <Link href="/admin/users" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            <div className="rounded-[28px] border border-red-100 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+                <h3 className="mb-4 text-lg font-bold text-gray-800">Quick Actions</h3>
+                <div className="flex flex-wrap gap-4">
+                    <Link href="/admin/users" className="rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(227,30,36,0.22)] transition hover:bg-red-700">
                         Manage Users
                     </Link>
                     {/* Add more actions */}
@@ -174,7 +165,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Debug Info */}
-            <div className="mt-8 p-4 bg-gray-50 rounded border border-gray-200 text-xs text-gray-400">
+            <div className="mt-8 rounded-[24px] border border-slate-200 bg-white/90 p-5 text-xs text-gray-400 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
                 <div className="flex justify-between items-start">
                     <div>
                         <p>Logged in as: <span className="font-mono text-gray-600 font-bold">{currentUser?.email || 'Not logged in'}</span></p>
@@ -185,7 +176,7 @@ export default function AdminDashboard() {
                     <div className="flex flex-col gap-2">
                         <button 
                             onClick={() => window.location.reload()}
-                            className="px-2 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300"
+                            className="rounded-xl bg-slate-100 px-3 py-2 text-gray-600 hover:bg-slate-200"
                         >
                             Hard Refresh
                         </button>
@@ -194,7 +185,7 @@ export default function AdminDashboard() {
                                 await supabase.auth.signOut();
                                 window.location.href = '/admin/login';
                             }}
-                            className="px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
+                            className="rounded-xl bg-red-100 px-3 py-2 text-red-600 hover:bg-red-200"
                         >
                             Force Logout
                         </button>
