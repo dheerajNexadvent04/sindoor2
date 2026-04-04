@@ -2,9 +2,10 @@
 "use client";
 
 import React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { X, Mail, Lock, Heart, Eye, EyeOff } from 'lucide-react';
 import styles from './LoginModal.module.css';
 import { supabase } from '@/lib/supabase';
@@ -21,6 +22,23 @@ const LoginModal = ({ isOpen, onClose, onSignUpClick }: LoginModalProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [pendingRedirect, setPendingRedirect] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (pendingRedirect && session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+                setLoading(false);
+                setError(null);
+                setPendingRedirect(false);
+                onClose();
+                router.replace('/dashboard');
+                router.refresh();
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [pendingRedirect, onClose, router]);
 
     if (!isOpen) return null;
 
@@ -35,6 +53,7 @@ const LoginModal = ({ isOpen, onClose, onSignUpClick }: LoginModalProps) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
+        setPendingRedirect(true);
 
         try {
             const { error } = await supabase.auth.signInWithPassword({
@@ -44,17 +63,18 @@ const LoginModal = ({ isOpen, onClose, onSignUpClick }: LoginModalProps) => {
 
             if (error) throw error;
 
-            // Success
+            setLoading(false);
+            setPendingRedirect(false);
             onClose();
-            // Force reload to update auth state if needed, or just push
-            // window.location.href = '/dashboard'; 
-            // Using router.push is better for SPA transition if auth state updates reactive
-            window.location.href = '/dashboard';
-        } catch (err: any) {
-            if (err.message.includes("Email not confirmed")) {
+            router.replace('/dashboard');
+            router.refresh();
+        } catch (err: unknown) {
+            setPendingRedirect(false);
+            const message = err instanceof Error ? err.message : "Failed to login";
+            if (message.includes("Email not confirmed")) {
                 setError("Please verify your email before logging in.");
             } else {
-                setError(err.message || "Failed to login");
+                setError(message);
             }
         } finally {
             setLoading(false);

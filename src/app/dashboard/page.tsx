@@ -3,125 +3,277 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Home, Heart, Users, User, Bell, Edit, Menu, X } from 'lucide-react';
+import { Heart, Users, User, Edit, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import styles from './dashboard.module.css';
 import { useAuth } from '@/context/AuthProvider';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar/Sidebar';
 
+interface DashboardProfile {
+    first_name: string | null;
+    last_name: string | null;
+    photo_url: string | null;
+    photos: string[] | null;
+    is_premium: boolean | null;
+    gender: string | null;
+    status?: string | null;
+}
+
+interface MatchProfile {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    date_of_birth: string | null;
+    photo_url: string | null;
+    profession: { title?: string } | string | null;
+    location: { city?: string } | string | null;
+}
+
+interface InterestedProfile {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    photo_url: string | null;
+    city: string | null;
+    state: string | null;
+}
+
+const getAge = (dateOfBirth: string | null) => {
+    if (!dateOfBirth) return 'N/A';
+    const dob = new Date(dateOfBirth);
+    if (Number.isNaN(dob.getTime())) return 'N/A';
+
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+
+    return age;
+};
+
+const getTextValue = (value: { title?: string; city?: string } | string | null | undefined, key: 'title' | 'city', fallback: string) => {
+    if (!value) return fallback;
+    if (typeof value === 'string') return value;
+    return value[key] || fallback;
+};
 
 export default function Dashboard() {
-    const { user, loading } = useAuth();
+    const { user, profile: authProfile, loading, refreshSession } = useAuth();
     const router = useRouter();
-    const [profile, setProfile] = React.useState<any>(null);
+    const [profile, setProfile] = React.useState<DashboardProfile | null>(null);
     const [stats, setStats] = React.useState({ views: 0, acceptedInterests: 0, receivedRequests: 0 });
-    const [matches, setMatches] = React.useState<any[]>([]);
-    const [fetchingProfile, setFetchingProfile] = React.useState(true);
-    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const [matches, setMatches] = React.useState<MatchProfile[]>([]);
+    const [interestedProfiles, setInterestedProfiles] = React.useState<InterestedProfile[]>([]);
+    const { signOut } = useAuth(); // Correctly extracting here
+    const [authChecked, setAuthChecked] = React.useState(false);
 
     React.useEffect(() => {
-        if (!loading && !user) {
-            router.push('/');
+        if (authProfile) {
+            setProfile((currentProfile) => ({
+                ...(currentProfile ?? {}),
+                ...authProfile,
+            }));
         }
+    }, [authProfile]);
 
-        async function fetchProfile() {
-            if (user) {
+    React.useEffect(() => {
+        async function fetchProfileData(userId: string) {
+            try {
+                const { data: profileData, error: profileErr } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+
+                if (profileErr) console.error("Dashboard profile error:", profileErr);
+                if (profileData) setProfile(profileData);
+
+                let viewsCount = 0, interestsCount = 0;
+
                 try {
-                    // Fetch profile
-                    const { data: profileData, error: profileErr } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', user.id)
-                        .single();
+                    const viewsReq = await supabase.from('profile_views').select('id', { count: 'exact', head: true }).eq('viewed_profile_id', userId);
+                    viewsCount = viewsReq.count || 0;
+                } catch (e) { console.error("Views fetch error", e); }
 
-                    if (profileData) setProfile(profileData);
+                try {
+                    const interestsReq = await supabase.from('shortlist').select('id', { count: 'exact', head: true }).eq('shortlisted_profile_id', userId);
+                    interestsCount = interestsReq.count || 0;
+                } catch (e) { console.error("Interests fetch error", e); }
 
-                    // Fetch stats
-                    const [viewsCount, acceptedCount, receivedCount] = await Promise.all([
-                        supabase.from('profile_views').select('*', { count: 'exact', head: true }).eq('viewed_profile_id', user.id),
-                        supabase.from('connection_requests').select('*', { count: 'exact', head: true }).eq('sender_id', user.id).eq('status', 'accepted'),
-                        supabase.from('connection_requests').select('*', { count: 'exact', head: true }).eq('receiver_id', user.id).eq('status', 'pending')
-                    ]);
+                setStats({
+                    views: viewsCount,
+                    acceptedInterests: interestsCount,
+                    receivedRequests: interestsCount
+                });
 
-                    setStats({
-                        views: viewsCount.count || 0,
-                        acceptedInterests: acceptedCount.count || 0,
-                        receivedRequests: receivedCount.count || 0
-                    });
+                try {
+                    const { data: shortlistRows, error: shortlistErr } = await supabase
+                        .from('shortlist')
+                        .select('user_id')
+                        .eq('shortlisted_profile_id', userId)
+                        .order('created_at', { ascending: false });
 
-                    // Fetch recommended matches (opp gender)
-                    const { data: matchesData } = await supabase
-                        .from('profiles')
-                        .select('id, first_name, last_name, gender, photo_url, education, location, profession')
-                        .neq('gender', profileData?.gender || 'None')
-                        .eq('status', 'approved')
-                        .limit(4);
+                    if (shortlistErr) throw shortlistErr;
 
-                    if (matchesData) setMatches(matchesData);
+                    const interestedIds = Array.from(new Set((shortlistRows || []).map((row) => row.user_id).filter(Boolean)));
 
-                } catch (error) {
-                    console.error('Error fetching dashboard data:', error);
-                } finally {
-                    setFetchingProfile(false);
+                    if (interestedIds.length > 0) {
+                        const { data: interestedRows, error: interestedErr } = await supabase
+                            .from('profiles')
+                            .select('id, first_name, last_name, photo_url, city, state')
+                            .in('id', interestedIds)
+                            .limit(6);
+
+                        if (interestedErr) throw interestedErr;
+                        setInterestedProfiles((interestedRows as InterestedProfile[]) || []);
+                    } else {
+                        setInterestedProfiles([]);
+                    }
+                } catch (e) {
+                    console.error("Interested profiles fetch error", e);
+                    setInterestedProfiles([]);
                 }
-            } else if (!loading && !user) {
-                setFetchingProfile(false);
+
+                const { data: matchesData, error: matchErr } = await supabase
+                    .from('profiles')
+                    .select('id, first_name, last_name, date_of_birth, photo_url, location, profession')
+                    .neq('gender', profileData?.gender || 'None')
+                    .neq('id', userId)
+                    .eq('status', 'approved')
+                    .limit(4);
+
+                if (matchErr) console.error("Dashboard match error:", matchErr);
+                if (matchesData) setMatches(matchesData);
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
             }
         }
 
-        fetchProfile();
-    }, [user, loading, router]);
+        async function bootstrapDashboard() {
+            if (user?.id) {
+                setAuthChecked(true);
+                await fetchProfileData(user.id);
+                return;
+            }
 
-    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+            if (!loading) {
+                const { data: { session } } = await supabase.auth.getSession();
 
-    const isPremium = profile?.is_premium || false;
+                if (session?.user?.id) {
+                    await refreshSession();
+                    setAuthChecked(true);
+                    await fetchProfileData(session.user.id);
+                    return;
+                }
+
+                setAuthChecked(true);
+                router.push('/');
+            }
+        }
+
+        void bootstrapDashboard();
+    }, [user?.id, loading, refreshSession, router]);
+
+    React.useEffect(() => {
+        const refreshDashboard = async () => {
+            if (document.visibilityState === 'hidden') return;
+
+            const userId = user?.id || (await supabase.auth.getSession()).data.session?.user?.id;
+            if (!userId) return;
+
+            try {
+                const { data: profileData } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+
+                if (profileData) setProfile(profileData);
+
+                const [{ count: viewsCount }, { count: interestsCount }] = await Promise.all([
+                    supabase.from('profile_views').select('id', { count: 'exact', head: true }).eq('viewed_profile_id', userId),
+                    supabase.from('shortlist').select('id', { count: 'exact', head: true }).eq('shortlisted_profile_id', userId),
+                ]);
+
+                setStats({
+                    views: viewsCount || 0,
+                    acceptedInterests: interestsCount || 0,
+                    receivedRequests: interestsCount || 0,
+                });
+            } catch (error) {
+                console.error('Dashboard refresh error:', error);
+            }
+        };
+
+        window.addEventListener('focus', refreshDashboard);
+        document.addEventListener('visibilitychange', refreshDashboard);
+
+        return () => {
+            window.removeEventListener('focus', refreshDashboard);
+            document.removeEventListener('visibilitychange', refreshDashboard);
+        };
+    }, [user?.id]);
+
+    const resolvedProfile = profile || authProfile;
+    const isPremium = resolvedProfile?.is_premium || false;
+    const isApprovedProfile = profile?.status === 'approved';
+    const displayName = resolvedProfile
+        ? `${resolvedProfile.first_name || ''} ${resolvedProfile.last_name || ''}`.trim() || 'Valued Member'
+        : user?.email?.split('@')[0] || 'My Account';
 
     const handleDeletePhoto = async (photoUrlToDelete: string) => {
         if (!confirm("Are you sure you want to delete this photo?")) return;
 
         try {
             const updatedPhotos = profile.photos.filter((p: string) => p !== photoUrlToDelete);
+            const nextPrimaryPhoto = updatedPhotos[0] || null;
 
             const { error } = await supabase
                 .from('profiles')
-                .update({ photos: updatedPhotos })
+                .update({ photos: updatedPhotos, photo_url: nextPrimaryPhoto })
                 .eq('id', user?.id);
 
             if (error) throw error;
 
             // Optimistic update
-            setProfile({ ...profile, photos: updatedPhotos });
+            setProfile({ ...profile, photos: updatedPhotos, photo_url: nextPrimaryPhoto });
         } catch (error) {
             console.error("Error deleting photo:", error);
             alert("Failed to delete photo. Please try again.");
         }
     };
 
-    if (loading || fetchingProfile) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>;
-
+    // Only block the UI if Auth is actively initializing. Let profile data load asynchronously.
+    if (!authChecked && loading) return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#fafafa', color: '#333' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Verifying Authentication...</h3>
+        </div>
+    );
+    
     return (
         <>
             {/* Header (User Widget) */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
                 <div className={styles.userWidget}>
-                    {profile?.photo_url ? (
-                        <Image
-                            src={profile.photo_url || (profile.photos && profile.photos[0]) || "/image 1.png"}
-                            alt="User"
-                            width={40}
-                            height={40}
-                            style={{ borderRadius: '50%', objectFit: 'cover' }}
-                            unoptimized
-                        />
-                    ) : (
-                        <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <User size={20} color="#999" />
-                        </div>
-                    )}
+                    <div className={styles.userImageContainer}>
+                        {resolvedProfile?.photo_url || resolvedProfile?.photos?.[0] ? (
+                            <Image
+                                src={resolvedProfile?.photo_url || resolvedProfile?.photos?.[0] || "/image 1.png"}
+                                alt="User"
+                                fill
+                                className={styles.userImage}
+                                unoptimized
+                            />
+                        ) : (
+                            <User size={30} color="#999" />
+                        )}
+                    </div>
                     <div className={styles.userWidgetInfo}>
                         <span className={styles.userWidgetName}>
-                            {profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Valued Member' : 'Loading...'}
+                            {displayName}
                         </span>
                         <span className={styles.userWidgetRole}>{isPremium ? 'Premium Member' : 'Free Member'}</span>
                     </div>
@@ -131,6 +283,14 @@ export default function Dashboard() {
                             <Edit size={14} />
                         </div>
                     </Link>
+                    {/* Logout Button */}
+                    <button 
+                        onClick={async () => { await signOut(); window.location.href = '/'; }}
+                        className={styles.logoutBtn}
+                        style={{ marginLeft: '10px' }}
+                    >
+                        Logout
+                    </button>
                 </div>
             </div>
 
@@ -151,7 +311,7 @@ export default function Dashboard() {
                         <Heart size={24} color="#E31E24" />
                     </div>
                     <div className={styles.statContent}>
-                        <h4>Accepted Interests</h4>
+                        <h4>Interests Received</h4>
                         <p>{stats.acceptedInterests}</p>
                     </div>
                 </div>
@@ -161,7 +321,7 @@ export default function Dashboard() {
                         <Users size={24} color="#4CAF50" />
                     </div>
                     <div className={styles.statContent}>
-                        <h4>Requests Received</h4>
+                        <h4>People Interested</h4>
                         <p>{stats.receivedRequests}</p>
                     </div>
                 </div>
@@ -213,9 +373,9 @@ export default function Dashboard() {
                             />
                         </div>
                         <div className={styles.cardContent}>
-                            <h4 className={styles.cardName}>{item.first_name}, {item.age || 'N/A'}</h4>
-                            <p className={styles.cardDetail}>{item.profession?.title || 'Member'}, {item.location?.city || 'India'}</p>
-                            <button className={styles.viewProfileBtn}>View Profile</button>
+                            <h4 className={styles.cardName}>{item.first_name}, {getAge(item.date_of_birth)}</h4>
+                            <p className={styles.cardDetail}>{getTextValue(item.profession, 'title', 'Member')}, {getTextValue(item.location, 'city', 'India')}</p>
+                            <Link href={`/dashboard/profile/${item.id}`} className={styles.viewProfileBtn}>View Profile</Link>
                         </div>
                     </div>
                 )) : (
@@ -226,21 +386,34 @@ export default function Dashboard() {
             {/* People Interested (Blurred) */}
             <h3 className={styles.sectionTitle}>People Interested</h3>
             <div className={styles.interestedSection}>
-                {!isPremium && (
+                {!isApprovedProfile ? (
                     <div className={styles.premiumOverlay}>
-                        <h3>Upgrade to see who's interested!</h3>
-                        <button className={styles.upgradeBtn}>View Plans</button>
+                        <h3>Wait till profile approved</h3>
+                        <p className={styles.overlayMessage}>Once admin approves your profile, views and interests from other users will appear here.</p>
                     </div>
-                )}
+                ) : null}
 
-                <div className={styles.interestedList}>
-                    {[1, 2, 3].map((item) => (
-                        <div key={item} style={{ padding: '15px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
-                            <div>
-                                <strong>Rahul, 31</strong> <span style={{ color: '#888' }}>Sent you Match Request</span>
+                <div className={`${styles.interestedList} ${isApprovedProfile ? styles.interestedListVisible : ''}`}>
+                    {interestedProfiles.length > 0 ? interestedProfiles.map((person) => (
+                        <div key={person.id} className={styles.interestedRow}>
+                            <div className={styles.interestedPerson}>
+                                <div className={styles.interestedAvatar}>
+                                    {person.photo_url ? (
+                                        <Image src={person.photo_url} alt={person.first_name || 'Profile'} fill className={styles.userImage} unoptimized />
+                                    ) : (
+                                        <User size={18} color="#999" />
+                                    )}
+                                </div>
+                                <div>
+                                    <strong>{`${person.first_name || ''} ${person.last_name || ''}`.trim() || 'Member'}</strong>
+                                    <span className={styles.interestedMeta}>{[person.city, person.state].filter(Boolean).join(', ') || 'Interested in your profile'}</span>
+                                </div>
                             </div>
+                            <span className={styles.interestedTag}>Interested</span>
                         </div>
-                    ))}
+                    )) : (
+                        <div className={styles.emptyInterested}>No interests received yet.</div>
+                    )}
                 </div>
             </div>
         </>

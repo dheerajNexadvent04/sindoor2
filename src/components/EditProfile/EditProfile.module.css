@@ -119,6 +119,15 @@
     opacity: 1;
 }
 
+.addPhotoOverlayBtn {
+    opacity: 1;
+    background: rgba(227, 30, 36, 0.9);
+}
+
+.addPhotoOverlayBtn:hover {
+    background: rgba(196, 25, 32, 0.95);
+}
+
 .changePhotoBtn {
     background-color: #E31E24;
     color: white;
@@ -320,6 +329,25 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    cursor: grab;
+}
+
+.galleryItemDragging {
+    opacity: 0.6;
+    transform: scale(0.98);
+}
+
+.primaryPhotoBadge {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    background: rgba(227, 30, 36, 0.92);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 999px;
+    z-index: 9;
 }
 
 .deleteBtn {
@@ -360,6 +388,12 @@
 .addPhotoCard:hover {
     border-color: #E31E24;
     background: #fff0f1;
+}
+
+.photoHint {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: #777;
 }
 
 /* Lightbox */

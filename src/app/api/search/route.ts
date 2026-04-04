@@ -101,9 +101,9 @@ export async function GET(request: Request) {
             }
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         return NextResponse.json(
-            { success: false, error: error.message },
+            { success: false, error: error instanceof Error ? error.message : 'Internal Server Error' },
             { status: 500 }
         );
     }

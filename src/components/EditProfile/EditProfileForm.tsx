@@ -1,21 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { User, Users, GraduationCap, X, Eye, Image as ImageIcon } from 'lucide-react';
+import { User, Users, GraduationCap, X, Eye, Plus, Image as ImageIcon } from 'lucide-react';
 import styles from './EditProfile.module.css';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthProvider';
 import { useRouter } from 'next/navigation';
 
 const EditProfileForm = () => {
-    const { user } = useAuth();
+    const { user, loading: authLoading, refreshSession } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false); // New state for tracking save status
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [showLightbox, setShowLightbox] = useState(false);
+    const primaryPhotoInputRef = useRef<HTMLInputElement>(null);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -60,30 +61,38 @@ const EditProfileForm = () => {
 
     const [photoUrl, setPhotoUrl] = useState<string | null>(null);
     const [photos, setPhotos] = useState<string[]>([]); // Added for gallery sync
+    const hasPrimaryPhoto = Boolean(photoUrl);
+    const [draggedPhotoIndex, setDraggedPhotoIndex] = useState<number | null>(null);
 
+    const syncPhotosWithProfile = async (nextPhotos: string[]) => {
+        const nextPrimaryPhoto = nextPhotos[0] || null;
 
-    useEffect(() => {
-        if (user) {
-            fetchProfile();
+        setPhotos(nextPhotos);
+        setPhotoUrl(nextPrimaryPhoto);
+
+        const { error } = await supabase
+            .from('profiles')
+            .update({
+                photos: nextPhotos,
+                photo_url: nextPrimaryPhoto,
+            })
+            .eq('id', user?.id);
+
+        if (error) {
+            throw error;
         }
-    }, [user]);
-
-
-
-
-
-
-    const fetchProfile = async () => {
+    };
+    const fetchProfile = async (userId: string) => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
                 .select('*')
-                .eq('id', user?.id)
+                .eq('id', userId)
                 .single();
 
             console.log("DEBUG: fetchProfile data:", data);
             console.log("DEBUG: fetchProfile error:", error);
-            console.log("DEBUG: current user id:", user?.id);
+            console.log("DEBUG: current user id:", userId);
 
             if (data) {
                 setPhotoUrl(data.photo_url);
@@ -136,6 +145,24 @@ const EditProfileForm = () => {
         }
     };
 
+    useEffect(() => {
+        const loadProfile = async () => {
+            if (authLoading) {
+                return;
+            }
+
+            if (user?.id) {
+                await fetchProfile(user.id);
+                return;
+            }
+
+            await refreshSession();
+            setLoading(false);
+        };
+
+        void loadProfile();
+    }, [user?.id, authLoading, refreshSession]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -172,20 +199,9 @@ const EditProfileForm = () => {
 
             // Update Profile
             // Append new photo to gallery
-            const updatedPhotos = [...(photos || []), publicUrl];
+            const updatedPhotos = photoUrl ? [...(photos || []), publicUrl] : [publicUrl, ...(photos || [])];
 
-            const { error: updateError } = await supabase
-                .from('profiles')
-                .update({
-                    photo_url: publicUrl,
-                    photos: updatedPhotos // Sync with gallery
-                })
-                .eq('id', user?.id);
-
-            if (updateError) throw updateError;
-
-            setPhotoUrl(publicUrl);
-            setPhotos(updatedPhotos); // Update local state
+            await syncPhotosWithProfile(updatedPhotos);
             setMessage({ type: 'success', text: 'Photo updated successfully!' });
 
         } catch (error: any) {
@@ -244,6 +260,7 @@ const EditProfileForm = () => {
                 native_city: formData.native_city,
                 family_location: formData.family_location,
                 about_family: formData.about_family,
+                status: 'pending',
                 
                 // Ensure photos are included in final save
                 photo_url: photoUrl,
@@ -323,23 +340,36 @@ const EditProfileForm = () => {
                                         <User size={64} color="#ccc" />
                                     </div>
                                 )}
-                                <button
-                                    type="button"
-                                    className={styles.viewProfileBtn}
-                                    onClick={() => setShowLightbox(true)}
-                                    title="View Photo"
-                                >
-                                    <Eye size={20} />
-                                </button>
+
+                                {hasPrimaryPhoto ? (
+                                    <button
+                                        type="button"
+                                        className={styles.viewProfileBtn}
+                                        onClick={() => setShowLightbox(true)}
+                                        title="View Photo"
+                                    >
+                                        <Eye size={20} />
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className={`${styles.viewProfileBtn} ${styles.addPhotoOverlayBtn}`}
+                                        onClick={() => primaryPhotoInputRef.current?.click()}
+                                        title="Add Photo"
+                                    >
+                                        <Plus size={22} />
+                                    </button>
+                                )}
                             </div>
                             <label className={styles.changePhotoBtn}>
-                                Change Photo
+                                {hasPrimaryPhoto ? 'Change Photo' : 'Add Photo'}
                                 <input
                                     type="file"
                                     accept="image/*"
                                     hidden
                                     onChange={handlePhotoUpload}
                                     disabled={saving}
+                                    ref={primaryPhotoInputRef}
                                 />
                             </label>
                         </div>
@@ -754,7 +784,34 @@ const EditProfileForm = () => {
                     </div>
                     <div className={styles.galleryGrid}>
                         {photos.map((photo, index) => (
-                            <div key={index} className={styles.galleryItem}>
+                            <div
+                                key={photo}
+                                className={`${styles.galleryItem} ${draggedPhotoIndex === index ? styles.galleryItemDragging : ''}`}
+                                draggable
+                                onDragStart={() => setDraggedPhotoIndex(index)}
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={async () => {
+                                    if (draggedPhotoIndex === null || draggedPhotoIndex === index) {
+                                        setDraggedPhotoIndex(null);
+                                        return;
+                                    }
+
+                                    const reorderedPhotos = [...photos];
+                                    const [movedPhoto] = reorderedPhotos.splice(draggedPhotoIndex, 1);
+                                    reorderedPhotos.splice(index, 0, movedPhoto);
+
+                                    try {
+                                        await syncPhotosWithProfile(reorderedPhotos);
+                                        setMessage({ type: 'success', text: 'Primary photo updated.' });
+                                    } catch (e) {
+                                        console.error(e);
+                                        setMessage({ type: 'error', text: 'Failed to reorder photos' });
+                                    } finally {
+                                        setDraggedPhotoIndex(null);
+                                    }
+                                }}
+                                onDragEnd={() => setDraggedPhotoIndex(null)}
+                            >
                                 <Image
                                     src={photo}
                                     alt={`Gallery ${index}`}
@@ -762,19 +819,17 @@ const EditProfileForm = () => {
                                     style={{ objectFit: 'cover' }}
                                     unoptimized
                                 />
+                                {index === 0 && (
+                                    <div className={styles.primaryPhotoBadge}>Profile Photo</div>
+                                )}
                                 <button
                                     type="button"
                                     className={styles.deleteBtn}
                                     onClick={async () => {
                                         if (!confirm("Delete this photo?")) return;
                                         const newPhotos = photos.filter(p => p !== photo);
-                                        setPhotos(newPhotos);
-                                        // Update immediately or wait for save?
-                                        // Immediate update for gallery is better UX usually, but here form saves on submit.
-                                        // But delete usually expects immediate effect.
-                                        // Let's do immediate update to DB to match Dashboard behavior.
                                         try {
-                                            await supabase.from('profiles').update({ photos: newPhotos }).eq('id', user?.id);
+                                            await syncPhotosWithProfile(newPhotos);
                                             setMessage({ type: 'success', text: 'Photo deleted' });
                                         } catch (e) {
                                             console.error(e);
@@ -804,9 +859,8 @@ const EditProfileForm = () => {
                                                 const { data: { publicUrl } } = supabase.storage.from('profile-photos').getPublicUrl(filePath);
                                                 newUrls.push(publicUrl);
                                             }
-                                            const updatedPhotos = [...photos, ...newUrls];
-                                            setPhotos(updatedPhotos);
-                                            await supabase.from('profiles').update({ photos: updatedPhotos }).eq('id', user?.id);
+                                            const updatedPhotos = photoUrl ? [...photos, ...newUrls] : [...newUrls, ...photos];
+                                            await syncPhotosWithProfile(updatedPhotos);
                                             setMessage({ type: 'success', text: 'Photos uploaded!' });
                                         } catch (err) {
                                             console.error(err);
@@ -820,6 +874,7 @@ const EditProfileForm = () => {
                             <span style={{ fontSize: '0.9rem', color: '#888' }}>Add Photos</span>
                         </label>
                     </div>
+                    <div className={styles.photoHint}>Drag a photo to the first position to make it your profile picture.</div>
                 </div>
 
                 <div className={styles.footerActions}>

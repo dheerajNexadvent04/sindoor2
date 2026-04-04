@@ -43,17 +43,16 @@ export default function AdminLogin() {
             router.push('/admin/dashboard');
             router.refresh();
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Login failed:', err);
-            // Nice error message
-            if (err.message.includes('Invalid login credentials')) {
+            const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
+            if (message.includes('Invalid login credentials')) {
                 setError('Invalid email or password.');
             } else {
-                setError(err.message || 'An unexpected error occurred.');
+                setError(message);
             }
 
-            // If unauthorized, sign out immediately to clear bad session
-            if (err.message.includes('Unauthorized')) {
+            if (message.includes('Unauthorized')) {
                 await supabase.auth.signOut();
             }
         } finally {

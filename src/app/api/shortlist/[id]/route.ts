@@ -15,23 +15,10 @@ export async function DELETE(
             return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Get Current User Profile ID
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('user_id', session.user.id)
-            .single();
-
-        if (!profile) {
-            return NextResponse.json({ success: false, error: 'Profile not found' }, { status: 404 });
-        }
-
-        // Delete based on composite key (user_id + shortlisted_profile_id)
-        // Matches the schema constraint
         const { error } = await supabase
             .from('shortlist')
             .delete()
-            .eq('user_id', profile.id)
+            .eq('user_id', session.user.id)
             .eq('shortlisted_profile_id', profileIdToRemove);
 
         if (error) {
@@ -43,9 +30,9 @@ export async function DELETE(
             message: 'Removed from shortlist'
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         return NextResponse.json(
-            { success: false, error: error.message },
+            { success: false, error: error instanceof Error ? error.message : 'Internal Server Error' },
             { status: 500 }
         );
     }

@@ -75,6 +75,102 @@
     background-color: #fff5f5;
 }
 
+/* User Profile Widget in Navbar */
+.authPlaceholder {
+    width: 150px;
+    height: 40px;
+}
+
+.userWidget {
+    background: #FFF0F1;
+    padding: 6px 16px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(227, 30, 36, 0.1);
+}
+
+.userWidget:hover {
+    background: #FFE5E7;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(227, 30, 36, 0.1);
+}
+
+.userImageContainer {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    border: 1.5px solid white;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.userImage {
+    object-fit: cover;
+}
+
+.userWidgetInfo {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.userWidgetName {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.2;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.userWidgetRole {
+    font-size: 0.7rem;
+    color: #E31E24;
+    font-weight: 500;
+}
+
+.btnLogoutSmall {
+    background: none;
+    border: 1px solid #ccc;
+    color: #666;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: all 0.2s;
+}
+
+.btnLogoutSmall:hover {
+    border-color: #E31E24;
+    color: #E31E24;
+    background: white;
+}
+
+.btnLogin {
+    background: none;
+    border: 1.4px solid #E31E24;
+    color: #E31E24;
+    padding: 8px 24px;
+    border-radius: 25px;
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
 .btnContact {
     padding: 7px 19px;
     border: 1px solid var(--primary-red);

@@ -1,14 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import styles from './register.module.css';
-import { Eye, EyeOff, Upload, X } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import CustomSelect from '@/components/common/CustomSelect';
 
 const RegisterPage = () => {
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
@@ -66,9 +63,8 @@ const RegisterPage = () => {
         familyLocation: '',
         aboutFamily: '',
 
-        // Bio & Photos
+        // Bio
         aboutMe: '',
-        photos: [] as File[]
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | { target: { name: string; value: string } }) => {
@@ -99,238 +95,110 @@ const RegisterPage = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id, files } = e.target;
-        if (files && files.length > 0) {
-            const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-
-            if (id === 'horoscope') {
-                if (files[0].size > MAX_SIZE) {
-                    alert("File size exceeds 5MB limit.");
-                    return;
-                }
-                setFormData(prev => ({ ...prev, horoscopeFile: files[0] }));
-            } else if (id === 'photos') {
-                const newPhotos = Array.from(files);
-                const validPhotos = newPhotos.filter(file => {
-                    if (file.size > MAX_SIZE) {
-                        alert(`File ${file.name} exceeds 5MB limit and was skipped.`);
-                        return false;
-                    }
-                    return true;
-                });
-
-                if (validPhotos.length > 0) {
-                    setFormData(prev => ({ ...prev, photos: [...prev.photos, ...validPhotos] }));
-                }
-            }
-        }
-    };
-
-    const removePhoto = (index: number) => {
-        setFormData(prev => ({
-            ...prev,
-            photos: prev.photos.filter((_, i) => i !== index)
-        }));
-    };
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
-        // Basic Validation
+        const textOnlyRegex = /^[a-zA-Z\s.-]+$/;
+        const phoneRegex = /^[0-9]{10,15}$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // 1. Mandatory Fields & Format Validation
         if (!formData.email || !formData.password || !formData.firstName || !formData.phone) {
-            setError('Please fill in all required fields.');
+            setError('Please fill in all required fields (Email, Password, Name, Phone).');
+            window.scrollTo(0, 0);
             return;
         }
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters.');
+
+        if (!emailRegex.test(formData.email)) {
+            setError('Please enter a valid email address');
+            window.scrollTo(0, 0);
             return;
         }
+
+        if (!phoneRegex.test(formData.phone)) {
+            setError('Please enter a valid 10-15 digit phone number (numbers only)');
+            window.scrollTo(0, 0);
+            return;
+        }
+
+        if (formData.password.length < 8) {
+            setError('Password must be at least 8 characters.');
+            window.scrollTo(0, 0);
+            return;
+        }
+
+        // 2. Age Validation (18+)
+        if (!formData.dob) {
+            setError("Please select Date of Birth");
+            window.scrollTo(0, 0);
+            return;
+        }
+        const dobDate = new Date(formData.dob);
+        const today = new Date();
+        let age = today.getFullYear() - dobDate.getFullYear();
+        const m = today.getMonth() - dobDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+            age--;
+        }
+        if (age < 18) {
+            setError("Minimum age for registration is 18 years.");
+            window.scrollTo(0, 0);
+            return;
+        }
+
+        // 3. Text Purity Validation
+        const textFieldsToVerify = {
+            'First Name': formData.firstName,
+            'Last Name': formData.lastName,
+            'Mother Tongue': formData.motherTongue,
+            'Religion': formData.religion,
+            'Caste': formData.caste,
+            'City': formData.city,
+            'State': formData.state,
+            'Native City': formData.nativeCity
+        };
+
+        for (const [label, value] of Object.entries(textFieldsToVerify)) {
+            if (value && !textOnlyRegex.test(value)) {
+                setError(`${label} should only contain letters, spaces, or dots.`);
+                window.scrollTo(0, 0);
+                return;
+            }
+        }
+
         if (!isConfirmed) {
             setError('Please confirm that the information provided is accurate.');
-            window.scrollTo(0, 0); // Scroll to top to see error
+            window.scrollTo(0, 0);
             return;
         }
 
         setLoading(true);
 
         try {
-            // 1. Register User Action
-            const { data, error: signUpError } = await supabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
-                options: {
-                    data: {
-                        first_name: formData.firstName,
-                        last_name: formData.lastName,
-                        gender: formData.gender,
-                        date_of_birth: formData.dob,
-                        height: formData.height,
-                        weight: formData.weight,
-                        body_type: formData.bodyType,
-                        blood_group: formData.bloodGroup,
-                        complexion: formData.complexion,
-                        marital_status: formData.maritalStatus,
-                        mother_tongue: formData.motherTongue,
-                        religion_name: formData.religion,
-                        caste_name: formData.caste,
-                        sub_caste_name: formData.subCaste,
-                        manglik: formData.manglik,
-                        profile_for: formData.profileFor,
-                        managed_by: formData.managedBy,
-                        looking_for: formData.lookingFor,
-                        degree: formData.degree,
-                        employed_in: formData.employedIn,
-                        occupation: formData.occupation,
-                        annual_income: formData.income,
-                        country: formData.country,
-                        state: formData.state,
-                        city: formData.city,
-                        family_type: formData.familyType,
-                        father_occupation: formData.fatherOcc,
-                        mother_occupation: formData.motherOcc,
-                        brothers_total: formData.brothersTotal,
-                        brothers_married: formData.brothersMarried,
-                        sisters_total: formData.sistersTotal,
-                        sisters_married: formData.sistersMarried,
-                        native_city: formData.nativeCity,
-                        family_location: formData.familyLocation,
-                        about_me: formData.aboutMe,
-                        phone: formData.phone,
-                        about_family: formData.aboutFamily,
-                    },
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({
+                    ...formData,
+                    phone: formData.phone.startsWith('+91') ? formData.phone : `+91${formData.phone}`,
+                }),
             });
 
-            if (signUpError) throw signUpError;
+            const result = await response.json();
 
-            if (data.user && !data.session) {
-                await supabase.auth.signInWithPassword({
-                    email: formData.email,
-                    password: formData.password,
-                });
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || 'Registration failed.');
             }
-
-            // 2. Upload Photos (Now Authenticated)
-            const photoUrls: string[] = [];
-            if (formData.photos.length > 0) {
-                for (const file of formData.photos) {
-                    const fileExt = file.name.split('.').pop();
-                    const fileName = Date.now() + '-' + Math.random().toString(36).substring(7) + '.' + fileExt;
-                    const filePath = 'uploads/' + fileName;
-
-                    const { error: uploadError } = await supabase.storage
-                        .from('profile-photos')
-                        .upload(filePath, file);
-
-                    if (uploadError) {
-                        console.error('CRITICAL: Photo upload failed:', uploadError.message);
-                        alert(`Photo upload failed: ${uploadError.message}. We will continue registration, but you may need to upload photos later.`);
-                        continue; // Skip failed uploads but continue registration
-                    }
-
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('profile-photos')
-                        .getPublicUrl(filePath);
-
-                    photoUrls.push(publicUrl);
-                }
-            }
-
-            // 3. Upload Horoscope
-            let horoscopeUrl = '';
-            if (formData.horoscopeFile) {
-                const fileExt = formData.horoscopeFile.name.split('.').pop();
-                const fileName = 'horoscope-' + Date.now() + '.' + fileExt;
-                const filePath = 'uploads/' + fileName;
-
-                const { error: uploadError } = await supabase.storage
-                    .from('profile-photos')
-                    .upload(filePath, formData.horoscopeFile);
-
-                if (!uploadError) {
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('profile-photos')
-                        .getPublicUrl(filePath);
-                    horoscopeUrl = publicUrl;
-                }
-            }
-            // 4. Update Profile explicitly (Fallback/Sync)
-            if (data.user) {
-                if (!data.session) {
-                    await supabase.auth.signInWithPassword({
-                        email: formData.email,
-                        password: formData.password,
-                    });
-                }
-
-                // Construct full profile update object
-                const updates = {
-                    first_name: formData.firstName,
-                    last_name: formData.lastName,
-                    gender: formData.gender,
-                    date_of_birth: formData.dob || null,
-                    height: formData.height ? parseFloat(formData.height) : null,
-                    weight: formData.weight ? parseFloat(formData.weight) : null,
-                    body_type: formData.bodyType,
-                    blood_group: formData.bloodGroup,
-                    complexion: formData.complexion,
-                    marital_status: formData.maritalStatus,
-                    mother_tongue: formData.motherTongue,
-                    religion_name: formData.religion,
-                    caste_name: formData.caste,
-                    sub_caste_name: formData.subCaste,
-                    manglik: formData.manglik,
-                    profile_for: formData.profileFor,
-                    managed_by: formData.managedBy,
-                    degree: formData.degree,
-                    employed_in: formData.employedIn,
-                    occupation: formData.occupation,
-                    annual_income: formData.income ? parseFloat(formData.income) : null,
-                    country: formData.country,
-                    state: formData.state,
-                    city: formData.city,
-                    family_type: formData.familyType,
-                    father_occupation: formData.fatherOcc,
-                    mother_occupation: formData.motherOcc,
-                    brothers_total: formData.brothersTotal ? parseInt(formData.brothersTotal) : 0,
-                    brothers_married: formData.brothersMarried ? parseInt(formData.brothersMarried) : 0,
-                    sisters_total: formData.sistersTotal ? parseInt(formData.sistersTotal) : 0,
-                    sisters_married: formData.sistersMarried ? parseInt(formData.sistersMarried) : 0,
-                    native_city: formData.nativeCity,
-                    family_location: formData.familyLocation,
-                    about_me: formData.aboutMe,
-                    about_family: formData.aboutFamily,
-                    photos: photoUrls,
-                    photo_url: photoUrls.length > 0 ? photoUrls[0] : null,
-                    updated_at: new Date().toISOString(),
-                };
-
-                // Use update instead of upsert since the trigger already creates the row
-                const { error: updateError } = await supabase
-                    .from('profiles')
-                    .update(updates)
-                    .eq('id', data.user.id);
-
-                if (updateError) {
-                    console.error("Manual profile update failed:", updateError.message);
-                    // If update fails, it's likely RLS/Auth. 
-                    // But trigger already saved the text fields!
-                    // Just remind the user to check their email.
-                    alert("Profile created! Please check your email to confirm your account and see your photos.");
-                } else {
-                    console.log("Profile updated successfully with photos.");
-                }
-            } else {
-                console.log("Registration succeeded, but no session yet. Waiting for email confirmation?");
-            }
-
-            alert("Registration successful! Please login.");
+             
+            alert("Registration successful! PLEASE CHECK YOUR EMAIL to confirm your account before logging in.");
             window.location.href = '/';
 
-        } catch (err: any) {
-            setError(err.message || "An error occurred during registration.");
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "An error occurred during registration.");
         } finally {
             setLoading(false);
         }
@@ -665,32 +533,12 @@ const RegisterPage = () => {
                         </div>
                     </div>
 
-                    {/* Section 7: About Me & Photos */}
+                    {/* Section 7: About Me */}
                     <div className={styles.formSection}>
-                        <h3 className={styles.sectionTitle}>About & Photos</h3>
+                        <h3 className={styles.sectionTitle}>About Me</h3>
                         <div className={styles.formGroup}>
-                            <label className={styles.label}>About Me</label>
-                            <textarea name="aboutMe" className={styles.textarea} value={formData.aboutMe} onChange={handleChange} required placeholder="Describe yourself..." />
-                        </div>
-
-                        <div className={styles.formGroup} style={{ marginTop: '20px' }}>
-                            <label className={styles.label}>Upload Photos</label>
-                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '10px' }}>
-                                Max size: 5MB per image. Formats: JPG, PNG. First photo will be your profile picture.
-                            </p>
-                            <div className={styles.photoUploadSection}>
-                                {formData.photos.map((photo, index) => (
-                                    <div key={index} className={styles.photoUploadBox} style={{ border: 'none' }}>
-                                        <img src={URL.createObjectURL(photo)} alt="preview" className={styles.photoPreview} />
-                                        <button type="button" className={styles.removePhoto} onClick={() => removePhoto(index)}><X size={12} /></button>
-                                    </div>
-                                ))}
-                                <label className={styles.photoUploadBox}>
-                                    <input type="file" id="photos" multiple accept="image/*" hidden onChange={handleFileChange} />
-                                    <Upload size={24} color="#ccc" />
-                                    <span style={{ fontSize: '0.8rem', color: '#999', marginTop: '5px' }}>Add Photo</span>
-                                </label>
-                            </div>
+                            <label className={styles.label}>Describe Yourself</label>
+                            <textarea name="aboutMe" className={styles.textarea} value={formData.aboutMe} onChange={handleChange} required placeholder="Tell us about yourself..." />
                         </div>
 
                         <div className={styles.checkboxGroup} style={{ marginTop: '20px' }}>

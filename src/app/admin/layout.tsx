@@ -7,8 +7,6 @@ import { createClient } from '@/utils/supabase/client';
 import {
     LayoutDashboard,
     Users,
-    Image as ImageIcon,
-    Settings,
     LogOut,
     ShieldCheck,
     Menu,
@@ -18,7 +16,7 @@ import {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
-    const supabase = createClient();
+    const [supabase] = React.useState(() => createClient());
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
     const handleLogout = async () => {
@@ -30,8 +28,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const navItems = [
         { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
         { label: 'User Management', href: '/admin/users', icon: Users },
-        { label: 'Photo Approvals', href: '/admin/photos', icon: ImageIcon },
-        { label: 'Masters', href: '/admin/masters', icon: Settings },
     ];
 
     return (

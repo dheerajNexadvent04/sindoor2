@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Search, Filter, Check, X, Trash2, Eye } from 'lucide-react';
+import { Search, Check, X } from 'lucide-react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 
 type UserProfile = {
     id: string;
@@ -17,12 +18,15 @@ type UserProfile = {
     created_at: string;
 };
 
+type UserStatus = UserProfile['status'];
+
 export default function UserManagement() {
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all'); // all, pending, approved
     const [search, setSearch] = useState('');
     const supabase = createClient();
+    const searchParams = useSearchParams();
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -54,10 +58,17 @@ export default function UserManagement() {
     };
 
     useEffect(() => {
-        fetchUsers();
+        const statusFromQuery = searchParams.get('status');
+        if (statusFromQuery === 'pending' || statusFromQuery === 'approved' || statusFromQuery === 'all') {
+            setFilter(statusFromQuery);
+        }
+    }, [searchParams]);
+
+    useEffect(() => {
+        void fetchUsers();
     }, [filter]);
 
-    const handleStatusChange = async (userId: string, newStatus: string) => {
+    const handleStatusChange = async (userId: string, newStatus: UserStatus) => {
         if (!confirm(`Are you sure you want to change status to ${newStatus}?`)) return;
 
         try {
@@ -69,7 +80,7 @@ export default function UserManagement() {
             if (error) throw error;
 
             // Optimistic update
-            setUsers(users.map(u => u.id === userId ? { ...u, status: newStatus as any } : u));
+            setUsers((currentUsers) => currentUsers.map((u) => u.id === userId ? { ...u, status: newStatus } : u));
         } catch (error) {
             console.error('Update failed:', error);
             alert('Failed to update status');

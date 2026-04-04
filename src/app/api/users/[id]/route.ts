@@ -10,8 +10,7 @@ export async function GET(
         const id = params.id;
         const supabase = await createClient();
 
-        // Check if user is authenticated (RLS will also handle this, but good to check)
-        const { data: { session }, error: authError } = await supabase.auth.getSession();
+        await supabase.auth.getSession();
 
         // Determine if we are fetching own profile (allows more data) or other's (limited data)
         // Note: RLS policies in schema.sql already handle:
@@ -54,9 +53,9 @@ export async function GET(
             data: profile
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         return NextResponse.json(
-            { success: false, error: error.message },
+            { success: false, error: error instanceof Error ? error.message : 'Internal Server Error' },
             { status: 500 }
         );
     }

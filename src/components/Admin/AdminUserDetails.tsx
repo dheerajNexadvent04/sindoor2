@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { User, Users, GraduationCap, X, Eye, Image as ImageIcon, CheckCircle, XCircle } from 'lucide-react';
+import { User, Users, GraduationCap, X, Image as ImageIcon } from 'lucide-react';
 // Reuse styles from EditProfile for consistency, or copy them if needed. 
 // Assuming we can reuse the module or similar class names.
 // For now, let's use tailwind classes for admin panel to keep it consistent with admin theme.
@@ -74,13 +74,48 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
 
         try {
             const updates = {
-                ...formData,
-                date_of_birth: formData.dob || null, // Map back to DB field
+                first_name: formData.first_name,
+                last_name: formData.last_name,
+                email: formData.email,
+                phone: formData.phone,
+                gender: formData.gender,
+                date_of_birth: formData.dob || null,
+                height: formData.height ? parseFloat(formData.height) : null,
+                weight: formData.weight ? parseFloat(formData.weight) : null,
+                marital_status: formData.marital_status,
+                mother_tongue: formData.mother_tongue,
+                religion_name: formData.religion_name,
+                caste_name: formData.caste_name,
+                sub_caste_name: formData.sub_caste_name,
+                manglik: formData.manglik,
+                degree: formData.degree,
+                occupation: formData.occupation,
+                employed_in: formData.employed_in,
+                annual_income: formData.annual_income ? parseFloat(formData.annual_income) : null,
+                complexion: formData.complexion,
+                body_type: formData.body_type,
+                blood_group: formData.blood_group,
+                about_me: formData.about_me,
+                city: formData.city,
+                state: formData.state,
+                country: formData.country,
+                profile_for: formData.profile_for,
+                managed_by: formData.managed_by,
+                family_type: formData.family_type,
+                father_occupation: formData.father_occupation,
+                mother_occupation: formData.mother_occupation,
+                brothers_total: formData.brothers_total ? parseInt(formData.brothers_total, 10) : 0,
+                brothers_married: formData.brothers_married ? parseInt(formData.brothers_married, 10) : 0,
+                sisters_total: formData.sisters_total ? parseInt(formData.sisters_total, 10) : 0,
+                sisters_married: formData.sisters_married ? parseInt(formData.sisters_married, 10) : 0,
+                native_city: formData.native_city,
+                family_location: formData.family_location,
+                about_family: formData.about_family,
+                photo_url: photoUrl,
+                photos,
+                status: formData.status,
                 updated_at: new Date().toISOString(),
             };
-            // Remove helper fields
-            delete updates.id;
-            delete updates.dob;
 
             const { error } = await supabase
                 .from('profiles')
@@ -89,8 +124,8 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
 
             if (error) throw error;
             setMessage({ type: 'success', text: 'User profile updated successfully!' });
-        } catch (error: any) {
-            setMessage({ type: 'error', text: error.message || 'Failed to update' });
+        } catch (error: unknown) {
+            setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Failed to update' });
         } finally {
             setSaving(false);
         }
@@ -198,9 +233,11 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                                             onClick={async () => {
                                                 if (!confirm("Delete this photo?")) return;
                                                 const newPhotos = photos.filter(p => p !== url);
+                                                const nextPrimaryPhoto = newPhotos[0] || null;
                                                 setPhotos(newPhotos);
+                                                setPhotoUrl(nextPrimaryPhoto);
                                                 // Update DB immediately
-                                                await supabase.from('profiles').update({ photos: newPhotos }).eq('id', userId);
+                                                await supabase.from('profiles').update({ photos: newPhotos, photo_url: nextPrimaryPhoto }).eq('id', userId);
                                             }}
                                         >
                                             <X size={12} />

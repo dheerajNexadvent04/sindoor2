@@ -8,10 +8,16 @@ async function inspect() {
     // But since we are on anon, we can't see pg_catalog easily.
     // Let's try to select everything from a specific row if possible.
 
-    // Check for profile_for column specifically
-    const { data: d1, error: e1 } = await supabase.from('profiles').select('profile_for').limit(1);
-    console.log("profile_for exists:", !e1);
-
+    // Specific checks for reported missing fields
+    const missingFields = ['profile_for', 'looking_for', 'blood_group', 'body_type'];
+    for (const field of missingFields) {
+        try {
+            const { error } = await supabase.from('profiles').select(field).limit(1);
+            console.log(`${field} exists:`, !error);
+        } catch (e) {
+            console.log(`${field} check failed`);
+        }
+    }
     // Check for photos column
     const { data: d2, error: e2 } = await supabase.from('profiles').select('photos').limit(1);
     console.log("photos exists:", !e2);

@@ -1,33 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import styles from './Hero.module.css';
 import { Heart, ChevronRight, ChevronLeft, CheckCircle, Eye, EyeOff } from 'lucide-react';
-import { useModal } from '@/context/ModalContext';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
 import CustomSelect from '../common/CustomSelect';
 
 const Hero = () => {
-    const { openSignUp } = useModal();
-    const router = useRouter();
-
     // Multi-step form state
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-
-    useEffect(() => {
-        // Ensure strictly no session when starting registration on Hero
-        const clearSession = async () => {
-            await supabase.auth.signOut();
-        };
-        clearSession();
-    }, []);
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -57,7 +44,6 @@ const Hero = () => {
         caste: '',
         subCaste: '',
         manglik: 'no',
-        horoscopeFile: null as File | null, // Added for file
 
         // Step 4: Career
         degree: '',
@@ -84,7 +70,6 @@ const Hero = () => {
         aboutMe: '',
         phone: '',
         otp: '',
-        photos: [] as File[] // Added for photos
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | { target: { name: string; value: string } }) => {
@@ -115,28 +100,26 @@ const Hero = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id, files } = e.target;
-        if (files && files.length > 0) {
-            if (id === 'horoscope') {
-                setFormData(prev => ({ ...prev, horoscopeFile: files[0] }));
-            } else if (id.startsWith('photo')) {
-                // Logic to append or replace photos could go here. 
-                // For simplicity, we'll just log it or add to a list if we had complex logic.
-                // Since UI has specific slots (photo1, photo2, photo3), we might want to store them by index or ID.
-                // For this implementation, we will push to the photos array.
-                setFormData(prev => ({ ...prev, photos: [...prev.photos, files[0]] }));
-            }
-        }
-    };
 
 
 
     const nextStep = async () => {
+        const textOnlyRegex = /^[a-zA-Z\s.-]+$/;
+        const phoneRegex = /^[0-9]{10,15}$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
         if (step === 1) {
             // Validate Step 1
             if (!formData.profileFor || !formData.email || !formData.password || !formData.phone) {
                 setError('Please fill in all fields');
+                return;
+            }
+            if (!emailRegex.test(formData.email)) {
+                setError('Please enter a valid email address');
+                return;
+            }
+            if (!phoneRegex.test(formData.phone)) {
+                setError('Please enter a valid 10-15 digit phone number');
                 return;
             }
             if (formData.password.length < 6) {
@@ -166,13 +149,20 @@ const Hero = () => {
         }
 
         if (step === 2) {
+            if (!formData.firstName || !formData.lastName) {
+                setError("First and Last name are required");
+                return;
+            }
+            if (!textOnlyRegex.test(formData.firstName) || !textOnlyRegex.test(formData.lastName)) {
+                setError("Names should not contain numbers or special characters");
+                return;
+            }
             if (!formData.dob) {
                 setError("Please select Date of Birth");
                 return;
             }
             const dobDate = new Date(formData.dob);
             const today = new Date();
-            // Calculate age
             let age = today.getFullYear() - dobDate.getFullYear();
             const m = today.getMonth() - dobDate.getMonth();
             if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
@@ -180,14 +170,44 @@ const Hero = () => {
             }
 
             if (age < 18) {
-                alert("You must be at least 18 years old to register.");
+                setError("Age must be at least 18 years for registration.");
                 return;
             }
             if (dobDate > today) {
-                alert("Date of birth cannot be in the future.");
+                setError("Date of birth cannot be in the future.");
                 return;
             }
         }
+
+        if (step === 3) {
+            if (!formData.motherTongue || !formData.religion || !formData.caste) {
+                setError("Please fill in all mandatory fields (Mother Tongue, Religion, Caste)");
+                return;
+            }
+            if (!textOnlyRegex.test(formData.motherTongue) || !textOnlyRegex.test(formData.religion) || !textOnlyRegex.test(formData.caste)) {
+                setError("Mother Tongue, Religion, and Caste should only contain letters");
+                return;
+            }
+        }
+
+        if (step === 4) {
+            if (!formData.degree || !formData.occupation || !formData.city || !formData.state) {
+                setError("Please fill in Degree, Occupation, City, and State");
+                return;
+            }
+            if (!textOnlyRegex.test(formData.city) || !textOnlyRegex.test(formData.state)) {
+                setError("City and State should only contain letters");
+                return;
+            }
+        }
+
+        if (step === 5) {
+            if (formData.nativeCity && !textOnlyRegex.test(formData.nativeCity)) {
+                setError("Native City should only contain letters");
+                return;
+            }
+        }
+
         setError('');
         setStep(prev => prev + 1);
     };
@@ -208,6 +228,7 @@ const Hero = () => {
                 email: formData.email,
                 password: formData.password,
                 options: {
+                    emailRedirectTo: `${window.location.origin}/auth/callback`,
                     data: {
                         first_name: formData.firstName,
                         last_name: formData.lastName,
@@ -246,138 +267,14 @@ const Hero = () => {
                         about_me: formData.aboutMe,
                         phone: formData.phone,
                         about_family: formData.aboutFamily,
-                        // photos and photo_url are left null initially; we'll update them after upload
                     },
                 },
             });
 
             if (signUpError) throw signUpError;
 
-            // 2. We now have a user. If we don't have a session, we need to sign in to upload photos.
-            // Normally signUp returns a session if email confirmation is off, else it doesn't.
-            if (data.user && !data.session) {
-                const { error: signInErr } = await supabase.auth.signInWithPassword({
-                    email: formData.email,
-                    password: formData.password,
-                });
-                if (signInErr) console.warn("Auto-signin failed after signup:", signInErr);
-            }
-
-            // 3. Upload Photos (User is now authenticated)
-            const photoUrls: string[] = [];
-            if (formData.photos.length > 0) {
-                for (const file of formData.photos) {
-                    const fileExt = file.name.split('.').pop();
-                    const fileName = Date.now() + '-' + Math.random().toString(36).substring(7) + '.' + fileExt;
-                    const filePath = 'uploads/' + fileName;
-
-                    const { error: uploadError } = await supabase.storage
-                        .from('profile-photos')
-                        .upload(filePath, file);
-
-                    if (uploadError) {
-                        console.error('Error uploading photo:', uploadError);
-                        alert(`Photo upload failed: ${uploadError.message}. Check storage permissions. Profile created without photo.`);
-                        continue;
-                    }
-
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('profile-photos')
-                        .getPublicUrl(filePath);
-
-                    photoUrls.push(publicUrl);
-                }
-            }
-
-            // 4. Upload Horoscope
-            let horoscopeUrl = '';
-            if (formData.horoscopeFile) {
-                const fileExt = formData.horoscopeFile.name.split('.').pop();
-                const fileName = 'horoscope-' + Date.now() + '.' + fileExt;
-                const filePath = 'uploads/' + fileName;
-
-                const { error: uploadError } = await supabase.storage
-                    .from('profile-photos')
-                    .upload(filePath, formData.horoscopeFile);
-
-                if (!uploadError) {
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('profile-photos')
-                        .getPublicUrl(filePath);
-                    horoscopeUrl = publicUrl;
-                }
-            }
-
-            // Explicitly update profile with photos and other complex data to ensure sync
-            // This runs after trigger creates the profile row
-            if (data.user) {
-                // Determine if we have a session. If email confirmation is enabled, we might not.
-                // If we have a session, we can update.
-                // If not, we rely entirely on the trigger.
-
-                // Attempt to sign in if no session (only works if auto-confirm is on or we have password)
-                if (!data.session) {
-                    const { data: signInData } = await supabase.auth.signInWithPassword({
-                        email: formData.email,
-                        password: formData.password,
-                    });
-                }
-
-                // Prepare updates object with ALL fields
-                const updates = {
-                    first_name: formData.firstName,
-                    last_name: formData.lastName,
-                    gender: formData.gender,
-                    date_of_birth: formData.dob || null,
-                    height: formData.height ? parseFloat(formData.height) : null,
-                    weight: formData.weight ? parseFloat(formData.weight) : null,
-                    body_type: formData.bodyType,
-                    blood_group: formData.bloodGroup,
-                    complexion: formData.complexion,
-                    marital_status: formData.maritalStatus,
-                    mother_tongue: formData.motherTongue,
-                    religion_name: formData.religion,
-                    caste_name: formData.caste,
-                    sub_caste_name: formData.subCaste,
-                    manglik: formData.manglik,
-                    profile_for: formData.profileFor,
-                    managed_by: formData.managedBy,
-                    degree: formData.degree,
-                    employed_in: formData.employedIn,
-                    occupation: formData.occupation,
-                    annual_income: formData.income ? parseFloat(formData.income) : null,
-                    country: formData.country,
-                    state: formData.state,
-                    city: formData.city,
-                    family_type: formData.familyType,
-                    father_occupation: formData.fatherOcc,
-                    mother_occupation: formData.motherOcc,
-                    brothers_total: formData.brothersTotal ? parseInt(formData.brothersTotal) : 0,
-                    brothers_married: formData.brothersMarried ? parseInt(formData.brothersMarried) : 0,
-                    sisters_total: formData.sistersTotal ? parseInt(formData.sistersTotal) : 0,
-                    sisters_married: formData.sistersMarried ? parseInt(formData.sistersMarried) : 0,
-                    native_city: formData.nativeCity,
-                    family_location: formData.familyLocation,
-                    about_me: formData.aboutMe,
-                    about_family: formData.aboutFamily,
-                    photos: photoUrls,
-                    photo_url: photoUrls.length > 0 ? photoUrls[0] : null, // Set main photo
-                    updated_at: new Date().toISOString(),
-                    user_id: data.user.id, // Match the Foreign Key in the profiles table
-                };
-
-                const { error: updateError } = await supabase
-                    .from('profiles')
-                    .update(updates)
-                    .eq('user_id', data.user.id);
-
-                if (updateError) {
-                    console.error("Error updating profile (fallback):", updateError);
-                }
-            }
-
             // Show success message and redirect
-            alert("Your profile is created! Please Login with your credentials.");
+            alert("Registration successful! PLEASE CHECK YOUR EMAIL to confirm your account before logging in.");
             window.location.href = '/';
         } catch (err: any) {
             setError(err.message);
@@ -421,7 +318,7 @@ const Hero = () => {
                         {step === 3 && "Step 3 – Personal Details"}
                         {step === 4 && "Step 4 – Career & Education"}
                         {step === 5 && "Step 5 – Family & Lifestyle"}
-                        {step === 6 && "Step 6 – About & Photos"}
+                        {step === 6 && "Step 6 – About Me"}
                     </h3>
 
                     <form onSubmit={handleRegister}>
@@ -634,12 +531,6 @@ const Hero = () => {
                                             { value: 'dont_know', label: "Don't Know" },
                                         ]}
                                     />
-                                    <div className={styles.uploadBtn}>
-                                        <input type="file" id="horoscope" style={{ display: 'none' }} onChange={handleFileChange} />
-                                        <label htmlFor="horoscope" style={{ fontSize: '0.9rem', cursor: 'pointer', fontWeight: 500, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            {formData.horoscopeFile ? formData.horoscopeFile.name : 'Upload Horoscope (Opt)'}
-                                        </label>
-                                    </div>
                                 </div>
                             </div>
                         )}
@@ -735,33 +626,6 @@ const Hero = () => {
                                 <span className={styles.wordCount}>
                                     {formData.aboutMe.trim().split(/\s+/).filter(Boolean).length} words
                                 </span>
-                                <div className={styles.photoInfo}>
-                                    <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}>
-                                        Max size: 5MB per image. Formats: JPG, PNG.
-                                    </p>
-                                </div>
-                                <div className={styles.photoUploads}>
-                                    <div className={styles.dropZone}>
-                                        <input type="file" id="photo1" style={{ display: 'none' }} onChange={handleFileChange} />
-                                        <label htmlFor="photo1" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                            {formData.photos[0] ? formData.photos[0].name : <>Upload Profile Photo<br /><span style={{ fontSize: '0.7rem' }}>( Drag & Drop )</span></>}
-                                        </label>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <div className={styles.smallDropZone}>
-                                            <input type="file" id="photo2" style={{ display: 'none' }} onChange={handleFileChange} />
-                                            <label htmlFor="photo2" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                {formData.photos[1] ? '✓' : '+'}
-                                            </label>
-                                        </div>
-                                        <div className={styles.smallDropZone}>
-                                            <input type="file" id="photo3" style={{ display: 'none' }} onChange={handleFileChange} />
-                                            <label htmlFor="photo3" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                {formData.photos[2] ? '✓' : '+'}
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div className={styles.checkboxGroup}>
                                     <input type="checkbox" id="confirm" checked={isConfirmed} onChange={(e) => setIsConfirmed(e.target.checked)} />
                                     <label htmlFor="confirm" style={{ fontSize: '0.8rem' }}>I confirm that the info provided is accurate.</label>
