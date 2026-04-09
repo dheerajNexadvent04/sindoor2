@@ -13,7 +13,7 @@ const OwnerSection = () => {
         <div className={styles.imageColumn}>
           <div className={styles.imageCard}>
             <Image
-              src="/groom-phone.png"
+              src="/owner.png"
               alt="Founder portrait"
               fill
               sizes="(max-width: 900px) 90vw, 40vw"
