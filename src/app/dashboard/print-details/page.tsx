@@ -230,8 +230,8 @@ export default function PrintDetailsPage() {
                     <div className={styles.grid}>
                         <p><span>First Name</span>{formatValue(profile.first_name)}</p>
                         <p><span>Last Name</span>{formatValue(profile.last_name)}</p>
-                        <p><span>Email</span>{formatValue(profile.email)}</p>
-                        <p><span>Phone</span>{formatValue(profile.phone)}</p>
+                        <p className={styles.hideInPrint}><span>Email</span>{formatValue(profile.email)}</p>
+                        <p className={styles.hideInPrint}><span>Phone</span>{formatValue(profile.phone)}</p>
                         <p><span>Profile For</span>{formatValue(profile.profile_for)}</p>
                         <p><span>Managed By</span>{formatValue(profile.managed_by)}</p>
                         <p><span>Gender</span>{formatValue(profile.gender)}</p>

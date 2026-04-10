@@ -291,7 +291,7 @@ const Hero = () => {
         <section className={styles.heroSection}>
             <div className={styles.heroBackground}>
                 <Image
-                    src="/hero-bg.png"
+                    src="/homepage-heroBanner.png"
                     alt="Indian Wedding Couple"
                     fill
                     priority

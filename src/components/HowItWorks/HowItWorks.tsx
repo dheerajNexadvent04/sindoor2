@@ -11,7 +11,7 @@ const steps = [
         highlight: "Profile",
         description: "Your profile is how people get to know you before they ever speak to you. Take a few minutes to fill it in thoughtfully and it will do a lot of the work for you.",
         icon: <Heart size={24} fill="currentColor" />,
-        image: "/mockup.png"
+        image: "/card-1,4.png"
     },
     {
         id: 2,
@@ -19,7 +19,7 @@ const steps = [
         highlight: "Membership",
         description: "We have plans for different needs and different budgets. Pick one that feels right for where you are in your search right now.",
         icon: <UserCheck size={24} />,
-        image: "/mockup.png"
+        image: "/card-size test.png"
     },
     {
         id: 3,
@@ -27,7 +27,7 @@ const steps = [
         highlight: "Reach Out",
         description: "Look through profiles at your own pace. When someone catches your attention, express interest or start a conversation. There is no rush here.",
         icon: <Search size={24} />,
-        image: "/mockup.png"
+        image: "/card-size test.png"
     },
     {
         id: 4,
@@ -35,7 +35,7 @@ const steps = [
         highlight: "Own Pace",
         description: "Everything that happens next is up to you. Your privacy settings, your conversations, your decisions. We are just here to make the introductions.",
         icon: <ArrowRight size={24} />,
-        image: "/mockup.png"
+        image: "/card-1,4.png"
     }
 ];
 
