@@ -77,7 +77,27 @@ const Navbar = () => {
         : normalizedStatus === 'Pending'
             ? styles.statusPending
             : styles.statusDisabled;
-    const announcementText = "100% Verified Profiles | India's one of the best online matchmaking website | Trusted by more than 50 couples | Get in touch today | Find matches as per your requirements |";
+    const announcementItems = [
+        '100% verified profiles',
+        "India's one of the best online matchmaking website",
+        'Trusted by more than 50 couples',
+        'Get in touch today',
+        'Find matches as per your requirements',
+    ];
+    const renderMarqueeLine = (keyPrefix: string) => (
+        <span className={styles.announcementLine}>
+            {announcementItems.map((item, index) => (
+                <span key={`${keyPrefix}-${item}-${index}`} className={styles.announcementItem}>
+                    {item}
+                    {index < announcementItems.length - 1 && (
+                        <span className={styles.announcementSeparator} aria-hidden="true">
+                            |
+                        </span>
+                    )}
+                </span>
+            ))}
+        </span>
+    );
 
     return (
         <>
@@ -90,8 +110,8 @@ const Navbar = () => {
             >
                 <div className={styles.topBar}>
                     <div className={styles.topBarTrack}>
-                        <span>{announcementText}</span>
-                        <span aria-hidden="true">{announcementText}</span>
+                        {renderMarqueeLine('a')}
+                        <span aria-hidden="true">{renderMarqueeLine('b')}</span>
                     </div>
                 </div>
 

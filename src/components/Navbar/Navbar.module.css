@@ -58,7 +58,9 @@
 .topBar {
     background-color: var(--primary-red);
     color: var(--white);
-    padding: 8px 0;
+    height: 34px;
+    display: flex;
+    align-items: center;
     font-size: 0.85rem;
     font-weight: 600;
     letter-spacing: 1px;
@@ -71,12 +73,30 @@
     display: inline-flex;
     align-items: center;
     min-width: max-content;
+    line-height: 1;
     animation: topBarScroll 28s linear infinite;
 }
 
 .topBarTrack span {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     padding-right: 0;
+}
+
+.announcementLine {
+    display: inline-flex;
+    align-items: center;
+}
+
+.announcementItem {
+    display: inline-flex;
+    align-items: center;
+}
+
+.announcementSeparator {
+    display: inline-block;
+    margin: 0 10px;
+    transform: translateY(-1px);
 }
 
 @keyframes topBarScroll {
