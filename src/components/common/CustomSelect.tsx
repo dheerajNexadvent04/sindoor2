@@ -17,9 +17,19 @@ interface CustomSelectProps {
     placeholder?: string;
     required?: boolean;
     className?: string; // For any extra wrapper custom classes if needed
+    variant?: 'default' | 'transparent';
 }
 
-const CustomSelect: React.FC<CustomSelectProps> = ({ name, value, onChange, options, placeholder = "Select", required }) => {
+const CustomSelect: React.FC<CustomSelectProps> = ({ 
+    name, 
+    value, 
+    onChange, 
+    options, 
+    placeholder = "Select", 
+    required,
+    className,
+    variant = 'default' 
+}) => {
     const [isOpen, setIsOpen] = useState(false);
     const selectRef = useRef<HTMLDivElement>(null);
 
@@ -52,8 +62,11 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ name, value, onChange, opti
     }, []);
 
     return (
-        <div className={`${styles.customSelect} ${isOpen ? styles.open : ''}`} ref={selectRef}>
-            <div className={styles.customSelectTrigger} onClick={() => setIsOpen(!isOpen)}>
+        <div className={`${styles.customSelect} ${isOpen ? styles.open : ''} ${className || ''}`} ref={selectRef}>
+            <div 
+                className={`${styles.customSelectTrigger} ${variant === 'transparent' ? styles.variantTransparent : ''}`} 
+                onClick={() => setIsOpen(!isOpen)}
+            >
                 <span className={value ? '' : styles.placeholder}>
                     {selectedOption ? selectedOption.label : placeholder}
                 </span>

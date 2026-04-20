@@ -19,7 +19,7 @@ export default function Home() {
       {/* <Navbar /> Removed to fix duplication */}
       <Hero />
       <ScrollReveal delay={40}><HowItWorks /></ScrollReveal>
-      <ScrollReveal delay={80}><WhyChooseUs /></ScrollReveal>
+      {/* <ScrollReveal delay={80}><WhyChooseUs /></ScrollReveal> */}
       <ScrollReveal delay={120}><Testimonials /></ScrollReveal>
       <ScrollReveal delay={170}><StatsOfUs /></ScrollReveal>
       <ScrollReveal delay={190}><OwnerSection /></ScrollReveal>

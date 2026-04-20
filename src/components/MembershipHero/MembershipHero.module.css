@@ -3,7 +3,7 @@
     color: white;
     padding: 60px 0 0 0;
     position: relative;
-    overflow: hidden;
+    /* overflow: hidden; Removed to allow dropdowns to show */
 }
 
 .container {

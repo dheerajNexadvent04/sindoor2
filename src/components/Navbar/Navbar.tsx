@@ -13,8 +13,13 @@ const Navbar = () => {
     const { openLogin } = useModal();
     const { session, user, profile, profileChecked } = useAuth();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [hasMounted, setHasMounted] = useState(false);
     const pathname = usePathname();
     const isAuthenticated = Boolean((session?.user || user) && (!profileChecked || profile?.id));
+
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -28,6 +33,12 @@ const Navbar = () => {
             document.body.style.overflow = previousOverflow;
         };
     }, [isMobileMenuOpen]);
+
+    const menuPages = ['/', '/membership', '/about', '/profile', '/contact', '/register'];
+    const isStickyPage = menuPages.some(page => {
+        if (page === '/') return pathname === '/';
+        return pathname?.startsWith(page);
+    });
 
     // Hide Navbar on Admin and Dashboard pages
     if (pathname?.startsWith('/admin') || pathname?.startsWith('/dashboard')) {
@@ -76,7 +87,7 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className={styles.navbarContainer}>
+            <nav className={`${styles.navbarContainer} ${isStickyPage ? styles.sticky : ''}`}>
                 <div className={styles.topBar}>
                     <div className={styles.topBarTrack}>
                         {renderMarqueeLine('a')}
@@ -103,37 +114,41 @@ const Navbar = () => {
                         <Link href="/" className={styles.navLink}>Home</Link>
                         <Link href="/membership" className={styles.navLink}>Membership</Link>
                         <Link href="/about" className={styles.navLink}>About Us</Link>
-                        {isAuthenticated && <Link href="/profile" className={styles.navLink}>View Profile</Link>}
+                        {hasMounted && isAuthenticated && <Link href="/profile" className={styles.navLink}>View Profile</Link>}
                         <Link href="/contact" className={styles.navLink}>Contact Us</Link>
                     </div>
 
                     {/* Desktop Auth Buttons / User Profile */}
                     <div className={styles.authButtons}>
-                        {isAuthenticated ? (
-                            <Link href="/dashboard" className={styles.accountBadge}>
-                                <div className={styles.userImageContainer}>
-                                    {primaryPhoto ? (
-                                        <Image
-                                            src={primaryPhoto}
-                                            alt="User"
-                                            fill
-                                            className={styles.userImage}
-                                            unoptimized
-                                        />
-                                    ) : (
-                                        <User size={22} color="#999" />
-                                    )}
-                                </div>
-                                <div className={styles.userWidgetInfo}>
-                                    <span className={styles.userWidgetName}>{displayName || 'My Account'}</span>
-                                    <span className={`${styles.statusBadge} ${statusClassName}`}>{normalizedStatus}</span>
-                                </div>
-                            </Link>
+                        {hasMounted ? (
+                            isAuthenticated ? (
+                                <Link href="/dashboard" className={styles.accountBadge}>
+                                    <div className={styles.userImageContainer}>
+                                        {primaryPhoto ? (
+                                            <Image
+                                                src={primaryPhoto}
+                                                alt="User"
+                                                fill
+                                                className={styles.userImage}
+                                                unoptimized
+                                            />
+                                        ) : (
+                                            <User size={22} color="#999" />
+                                        )}
+                                    </div>
+                                    <div className={styles.userWidgetInfo}>
+                                        <span className={styles.userWidgetName}>{displayName || 'My Account'}</span>
+                                        <span className={`${styles.statusBadge} ${statusClassName}`}>{normalizedStatus}</span>
+                                    </div>
+                                </Link>
+                            ) : (
+                                <>
+                                    <button className={styles.btnLogin} onClick={openLogin}>Login</button>
+                                    <Link href="/register" className={styles.btnContact}>Register</Link>
+                                </>
+                            )
                         ) : (
-                            <>
-                                <button className={styles.btnLogin} onClick={openLogin}>Login</button>
-                                <Link href="/register" className={styles.btnContact}>Register</Link>
-                            </>
+                            <div className={styles.authPlaceholder} />
                         )}
                     </div>
 
@@ -179,37 +194,39 @@ const Navbar = () => {
                         <Link href="/" className={styles.mobileNavLink} onClick={toggleMobileMenu}>Home</Link>
                         <Link href="/membership" className={styles.mobileNavLink} onClick={toggleMobileMenu}>Membership</Link>
                         <Link href="/about" className={styles.mobileNavLink} onClick={toggleMobileMenu}>About Us</Link>
-                        {isAuthenticated && <Link href="/profile" className={styles.mobileNavLink} onClick={toggleMobileMenu}>View Profile</Link>}
+                        {hasMounted && isAuthenticated && <Link href="/profile" className={styles.mobileNavLink} onClick={toggleMobileMenu}>View Profile</Link>}
                         <Link href="/contact" className={styles.mobileNavLink} onClick={toggleMobileMenu}>Contact Us</Link>
                     </div>
 
                     <div className={styles.mobileAuthButtons}>
-                        {isAuthenticated ? (
-                            <Link href="/dashboard" className={styles.accountBadge} onClick={toggleMobileMenu}>
-                                <div className={styles.userImageContainer}>
-                                    {primaryPhoto ? (
-                                        <Image
-                                            src={primaryPhoto}
-                                            alt="User"
-                                            fill
-                                            className={styles.userImage}
-                                            unoptimized
-                                        />
-                                    ) : (
-                                        <User size={22} color="#999" />
-                                    )}
-                                </div>
-                                <div className={styles.userWidgetInfo}>
-                                    <span className={styles.userWidgetName}>{displayName || 'My Account'}</span>
-                                    <span className={`${styles.statusBadge} ${statusClassName}`}>{normalizedStatus}</span>
-                                </div>
-                            </Link>
-                        ) : (
-                            <>
-                                <button className={styles.btnLogin} onClick={() => { openLogin(); toggleMobileMenu(); }}>Login</button>
-                                <Link href="/register" className={styles.btnContact} onClick={toggleMobileMenu}>Register</Link>
-                            </>
-                        )}
+                        {hasMounted ? (
+                            isAuthenticated ? (
+                                <Link href="/dashboard" className={styles.accountBadge} onClick={toggleMobileMenu}>
+                                    <div className={styles.userImageContainer}>
+                                        {primaryPhoto ? (
+                                            <Image
+                                                src={primaryPhoto}
+                                                alt="User"
+                                                fill
+                                                className={styles.userImage}
+                                                unoptimized
+                                            />
+                                        ) : (
+                                            <User size={22} color="#999" />
+                                        )}
+                                    </div>
+                                    <div className={styles.userWidgetInfo}>
+                                        <span className={styles.userWidgetName}>{displayName || 'My Account'}</span>
+                                        <span className={`${styles.statusBadge} ${statusClassName}`}>{normalizedStatus}</span>
+                                    </div>
+                                </Link>
+                            ) : (
+                                <>
+                                    <button className={styles.btnLogin} onClick={() => { openLogin(); toggleMobileMenu(); }}>Login</button>
+                                    <Link href="/register" className={styles.btnContact} onClick={toggleMobileMenu}>Register</Link>
+                                </>
+                            )
+                        ) : null}
                     </div>
                 </div>
             </nav>

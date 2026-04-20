@@ -1,12 +1,16 @@
 .navbarContainer {
     width: 100%;
-    position: sticky;
-    top: 0;
     z-index: 1000;
     background-color: var(--white);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     font-family: var(--font-family);
     transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.sticky {
+    position: sticky;
+    top: -34px;
+    z-index: 1100;
 }
 
 .navbarStickyHome {

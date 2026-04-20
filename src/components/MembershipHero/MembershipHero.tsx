@@ -3,6 +3,7 @@
 import React from 'react';
 import styles from './MembershipHero.module.css';
 import Image from 'next/image';
+import CustomSelect from '../common/CustomSelect';
 
 const MembershipHero = () => {
     const [leadForm, setLeadForm] = React.useState({
@@ -110,29 +111,29 @@ const MembershipHero = () => {
                     >
                         <div className={`${styles.formGroup} ${styles.borderRight}`}>
                             <label className={styles.label}>Mother Tongue</label>
-                            <select
-                                className={styles.select}
+                            <CustomSelect
                                 name="motherTongue"
                                 value={leadForm.motherTongue}
                                 onChange={handleChange}
                                 required
-                            >
-                                <option value="" disabled>Select</option>
-                                <option value="hindi">Hindi</option>
-                                <option value="english">English</option>
-                                <option value="punjabi">Punjabi</option>
-                                <option value="marathi">Marathi</option>
-                                <option value="bengali">Bengali</option>
-                                <option value="gujarati">Gujarati</option>
-                                <option value="urdu">Urdu</option>
-                                <option value="telugu">Telugu</option>
-                                <option value="kannada">Kannada</option>
-                                <option value="tamil">Tamil</option>
-                                <option value="malayalam">Malayalam</option>
-                                <option value="odia">Odia</option>
-                                <option value="assamese">Assamese</option>
-                                <option value="other">Other</option>
-                            </select>
+                                variant="transparent"
+                                placeholder="Select"
+                                options={[
+                                    { value: "hindi", label: "Hindi" },
+                                    { value: "english", label: "English" },
+                                    { value: "punjabi", label: "Punjabi" },
+                                    { value: "marathi", label: "Marathi" },
+                                    { value: "bengali", label: "Bengali" },
+                                    { value: "gujarati", label: "Gujarati" },
+                                    { value: "telugu", label: "Telugu" },
+                                    { value: "kannada", label: "Kannada" },
+                                    { value: "tamil", label: "Tamil" },
+                                    { value: "malayalam", label: "Malayalam" },
+                                    { value: "odia", label: "Odia" },
+                                    { value: "assamese", label: "Assamese" },
+                                    { value: "other", label: "Other" },
+                                ]}
+                            />
                         </div>
 
                         <div className={`${styles.formGroup} ${styles.borderRight}`}>

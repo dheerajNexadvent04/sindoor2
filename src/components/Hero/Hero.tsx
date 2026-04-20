@@ -663,13 +663,9 @@ const Hero = () => {
 
             <div className={styles.bottomBar}>
                 <div className={styles.bottomBarContent}>
-                    <span>A Growing Community of Serious Profiles Across India</span>
-                    <span className={styles.separator}>|</span>
-                    <span>
-                        <span className={styles.stars}>★★★★★</span> Rated
-                    </span>
-                    <span className={styles.separator}>|</span>
-                    <span>Part Of Over 50+ Wedding Stories</span>
+                    <span className={styles.statItem}>A Growing Community of Serious Profiles Across India</span>
+                    <span className={styles.statItem}><span className={styles.stars}>★★★★★</span> Rated</span>
+                    <span className={styles.statItem}>Part Of Over 50+ Wedding Stories</span>
                 </div>
             </div>
         </section>
