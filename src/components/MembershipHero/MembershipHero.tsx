@@ -15,7 +15,7 @@ const MembershipHero = () => {
     const [submitMessage, setSubmitMessage] = React.useState<string | null>(null);
 
     const handleChange = (
-        event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+        event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { target: { name: string; value: string } }
     ) => {
         const { name, value } = event.target;
         if (name === 'phone') {
