@@ -25,37 +25,34 @@ const MembershipStats = () => {
 
             <div className={styles.container}>
                 <div className={styles.headingContainer}>
-                    <h2 className={styles.heading}>WHY SINDOOR SAUBHAGAYA</h2>
+                    <h2 className={styles.heading}>Why Elite Matrimony?</h2>
                     <p className={styles.subHeading}>
-                        Sindoor Saubhagaya offers a more considered approach to matchmaking, built on trust,
-                        understanding, and meaningful introductions.
-                    </p>
-                    <p className={styles.subHeading}>
-                        Designed for individuals and families who prefer a guided, private, and more refined
-                        experience.
+                        Sindoor Saubhagya is a pioneer and leader in online matrimony services for Indians
+                        worldwide. We bring over 17 years of expertise in pioneering the Elite matchmaking service,
+                        and offer the most exclusive database of truly Elite matches for you!
                     </p>
                 </div>
 
                 <div className={styles.cardsGrid}>
                     <StatsCard
                         icon="/icon1.png"
-                        value="10+ Years"
-                        text="Years of Experience"
+                        value="17+"
+                        text="Years of Expertise"
                     />
                     <StatsCard
                         icon="/icon2.png"
-                        value="500+"
-                        text="Registered Members"
+                        value="1,00,000+"
+                        text="Elite customers"
                     />
                     <StatsCard
                         icon="/icon3.png"
-                        value="80+"
+                        value="100+"
                         text="Relationship Managers"
                     />
                     <StatsCard
                         icon="/icon4.png"
-                        value="100% Private"
-                        text="Confidentiality"
+                        value="100%"
+                        text="Confidential"
                     />
                 </div>
             </div>

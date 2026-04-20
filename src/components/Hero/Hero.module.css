@@ -610,19 +610,13 @@
     }
 
     .actionButtons {
-        flex-direction: row;
-        gap: 0.6rem;
-        width: 100%;
+        flex-direction: column;
+        gap: 1rem;
     }
 
     .btnPrimary,
     .btnSecondary {
-        flex: 1;
-        width: auto;
-        text-align: center;
-        font-size: 0.95rem;
-        padding: 12px 10px;
-        border-radius: 26px;
+        width: 100%;
     }
 }
 
@@ -665,24 +659,12 @@
 
 @media (max-width: 768px) {
     .bottomBarContent {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 0.4rem;
+        flex-direction: column;
+        gap: 0.5rem;
         text-align: center;
-        width: 100%;
-        justify-content: center;
-        overflow-x: auto;
-        white-space: nowrap;
-        font-size: clamp(0.72rem, 2.4vw, 0.9rem);
-        padding: 0 8px;
-    }
-
-    .bottomBarContent span {
-        white-space: nowrap;
     }
 
     .separator {
-        display: inline;
-        padding: 0 4px;
+        display: none;
     }
 }

@@ -47,21 +47,16 @@
 
 .heading {
     font-size: 2.5rem;
-    color: #111111;
+    color: #c47b31;
+    /* Elite Matrimony orange/gold color */
     margin-bottom: 20px;
     font-weight: 700;
-    text-transform: uppercase;
 }
 
 .subHeading {
     font-size: 1rem;
     color: #4a4a4a;
     line-height: 1.6;
-    margin-bottom: 12px;
-}
-
-.subHeading:last-child {
-    margin-bottom: 0;
 }
 
 /* Stats Cards Grid */

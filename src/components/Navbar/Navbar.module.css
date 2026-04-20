@@ -1,23 +1,112 @@
 .navbarContainer {
     width: 100%;
-    position: -webkit-sticky;
     position: sticky;
     top: 0;
     z-index: 1000;
     background-color: var(--white);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     font-family: var(--font-family);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.navbarStickyHome {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1200;
+    background: transparent;
+    box-shadow: none;
+    animation: homeStickyIn 0.22s ease;
+}
+
+.navbarStickyHome .topBar {
+    display: none;
+}
+
+.navbarStickyHome .mainNav {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    background: var(--white);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
+    border: 0;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+@keyframes homeStickyIn {
+    from {
+        transform: translateY(-12px);
+        opacity: 0.95;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 900px) {
+    .navbarStickyHome .mainNav {
+        max-width: 100%;
+        margin-top: 0;
+        border-radius: 0;
+    }
 }
 
 .topBar {
     background-color: var(--primary-red);
     color: var(--white);
-    text-align: center;
-    padding: 8px 0;
+    height: 34px;
+    display: flex;
+    align-items: center;
     font-size: 0.85rem;
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.topBarTrack {
+    display: inline-flex;
+    align-items: center;
+    min-width: max-content;
+    line-height: 1;
+    animation: topBarScroll 28s linear infinite;
+}
+
+.topBarTrack span {
+    display: inline-flex;
+    align-items: center;
+    padding-right: 0;
+}
+
+.announcementLine {
+    display: inline-flex;
+    align-items: center;
+}
+
+.announcementItem {
+    display: inline-flex;
+    align-items: center;
+}
+
+.announcementSeparator {
+    display: inline-block;
+    margin: 0 10px;
+    transform: translateY(-1px);
+}
+
+@keyframes topBarScroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
 }
 
 .mainNav {
@@ -26,6 +115,7 @@
     align-items: center;
     padding: 1rem 5%;
     height: 80px;
+    gap: 18px;
 }
 
 .logoContainer {
@@ -42,6 +132,8 @@
 .navLinks {
     display: flex;
     gap: 2rem;
+    justify-content: center;
+    flex: 1;
 }
 
 .navLink {
@@ -59,6 +151,8 @@
     display: flex;
     gap: 1rem;
     align-items: center;
+    justify-content: flex-end;
+    min-width: 220px;
 }
 
 .btnLogin {
@@ -82,36 +176,42 @@
     height: 40px;
 }
 
-.userWidget {
-    background: #FFF0F1;
-    padding: 6px 16px;
-    border-radius: 40px;
+.accountBadge {
+    width: fit-content;
+    min-width: 0;
+    max-width: 100%;
+    background: linear-gradient(135deg, rgba(255, 252, 252, 0.98) 0%, rgba(255, 247, 247, 0.96) 100%);
+    padding: 7px 12px;
+    border-radius: 999px;
     display: flex;
     align-items: center;
     gap: 10px;
     text-decoration: none;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(227, 30, 36, 0.1);
+    transition: all 0.25s ease;
+    border: 1px solid rgba(227, 30, 36, 0.14);
+    box-shadow: 0 12px 28px rgba(227, 30, 36, 0.08);
+    backdrop-filter: blur(10px);
 }
 
-.userWidget:hover {
-    background: #FFE5E7;
+.accountBadge:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(227, 30, 36, 0.1);
+    box-shadow: 0 16px 32px rgba(227, 30, 36, 0.12);
+    border-color: rgba(227, 30, 36, 0.22);
 }
 
 .userImageContainer {
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     overflow: hidden;
     position: relative;
-    border: 1.5px solid white;
-    background: #eee;
+    border: 1.5px solid rgba(255, 255, 255, 0.95);
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
 .userImage {
@@ -123,41 +223,41 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    min-width: 0;
 }
 
 .userWidgetName {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #333;
-    line-height: 1.2;
-    max-width: 120px;
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.1;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    text-transform: lowercase;
 }
 
-.userWidgetRole {
-    font-size: 0.7rem;
-    color: #E31E24;
-    font-weight: 500;
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: 3px;
+    padding: 0;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: transparent;
 }
 
-.btnLogoutSmall {
-    background: none;
-    border: 1px solid #ccc;
-    color: #666;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    cursor: pointer;
-    margin-left: 5px;
-    transition: all 0.2s;
+.statusApproved {
+    color: #15803d;
 }
 
-.btnLogoutSmall:hover {
-    border-color: #E31E24;
-    color: #E31E24;
-    background: white;
+.statusPending {
+    color: #c2410c;
+}
+
+.statusDisabled {
+    color: #4b5563;
 }
 
 .btnLogin {
@@ -215,38 +315,50 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(3px);
     z-index: 1001;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+
+.mobileMenuOverlay.open {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .mobileMenu {
     position: fixed;
     top: 0;
     right: 0;
-    width: 70%;
-    max-width: 300px;
+    width: min(82vw, 340px);
     height: 100%;
-    background-color: #fff5f5;
-    /* Light pinkish bg as per design */
+    background: linear-gradient(180deg, #fff7f7 0%, #fffdfc 100%);
     z-index: 1002;
-    padding: 1rem;
+    padding: 1.1rem 1rem 1.4rem;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-    transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
+    gap: 1.6rem;
+    border-left: 1px solid rgba(227, 30, 36, 0.12);
+    box-shadow: -18px 0 42px rgba(15, 23, 42, 0.18);
+    transform: translateX(102%);
+    opacity: 0;
+    transition: transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.36s ease;
 }
 
 .mobileMenu.open {
     transform: translateX(0);
+    opacity: 1;
 }
 
 .mobileCloseHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid rgba(227, 30, 36, 0.08);
 }
 
 .mobileTitle {
@@ -258,25 +370,65 @@
 .mobileLinks {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    align-items: center;
+    gap: 0.6rem;
+    align-items: stretch;
 }
 
 .mobileNavLink {
-    color: var(--text-dark);
-    font-size: 1.1rem;
+    color: #1f2937;
+    font-size: 1.18rem;
     font-weight: 500;
+    line-height: 1.3;
+    text-align: left;
+    padding: 0.72rem 0.56rem;
+    border-radius: 12px;
+    transition: background-color 0.22s ease, color 0.22s ease, transform 0.22s ease;
+}
+
+.mobileNavLink:hover {
+    background: #fff1f2;
+    color: #b91c1c;
+    transform: translateX(2px);
 }
 
 .mobileAuthButtons {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 0.9rem;
+    margin-top: auto;
     width: 100%;
+    padding-top: 0.8rem;
+    border-top: 1px solid rgba(227, 30, 36, 0.08);
 }
 
 .mobileAuthButtons button {
     width: 100%;
     padding: 12px;
+}
+
+.mobileAuthButtons .btnLogin,
+.mobileAuthButtons .btnContact {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 600;
+}
+
+.mobileAuthButtons .accountBadge {
+    width: 100%;
+    max-width: none;
+    justify-content: flex-start;
+}
+
+.mobileCloseBtn {
+    background: none;
+    border: none;
+    color: #d32f2f;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
