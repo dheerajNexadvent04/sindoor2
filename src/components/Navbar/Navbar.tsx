@@ -76,9 +76,9 @@ const Navbar = () => {
                         ) : user ? (
                             <Link href="/dashboard" className={styles.userWidget}>
                                 <div className={styles.userImageContainer}>
-                                    {profile?.photo_url || (profile?.photos && profile.photos[0]) ? (
+                                    {profile?.photo_url || profile?.photos?.[0] ? (
                                         <Image
-                                            src={profile.photo_url || profile.photos[0] || "/image 1.png"}
+                                            src={profile?.photo_url || profile?.photos?.[0] || "/image 1.png"}
                                             alt="User"
                                             fill
                                             className={styles.userImage}
@@ -152,9 +152,9 @@ const Navbar = () => {
                         {authLoading ? null : user ? (
                             <Link href="/dashboard" className={styles.userWidget} onClick={toggleMobileMenu}>
                                 <div className={styles.userImageContainer}>
-                                    {profile?.photo_url || (profile?.photos && profile.photos[0]) ? (
+                                    {profile?.photo_url || profile?.photos?.[0] ? (
                                         <Image
-                                            src={profile.photo_url || profile.photos[0] || "/image 1.png"}
+                                            src={profile?.photo_url || profile?.photos?.[0] || "/image 1.png"}
                                             alt="User"
                                             fill
                                             className={styles.userImage}
