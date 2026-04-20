@@ -40,6 +40,11 @@ const Navbar = () => {
         }
     }, [pathname, authLoading, user, refreshSession]);
 
+    // Keep sticky header sitewide except dashboard areas.
+    if (pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin')) {
+        return null;
+    }
+
     return (
         <>
             <nav className={styles.navbarContainer}>
