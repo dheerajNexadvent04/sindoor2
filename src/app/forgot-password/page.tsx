@@ -20,7 +20,14 @@ export default function ForgotPassword() {
 
         try {
             const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, '');
-            const appOrigin = configuredSiteUrl || window.location.origin;
+            const runtimeOrigin = window.location.origin.replace(/\/$/, '');
+            const configuredIsLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configuredSiteUrl || '');
+            const runtimeIsLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(runtimeOrigin);
+
+            // Guard against production builds accidentally carrying localhost SITE_URL.
+            const appOrigin = (!runtimeIsLocalhost && configuredIsLocalhost)
+                ? runtimeOrigin
+                : (configuredSiteUrl || runtimeOrigin);
 
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: `${appOrigin}/auth/callback?next=/update-password`,

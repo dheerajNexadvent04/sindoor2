@@ -109,7 +109,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 {/* Mobile Header */}
-                <header className="lg:hidden flex h-16 items-center bg-white/90 px-4 shadow-sm backdrop-blur">
+                <header className="lg:hidden flex h-16 items-center bg-white/90 px-3 shadow-sm backdrop-blur">
                     <button
                         onClick={() => setIsSidebarOpen(true)}
                         className="text-slate-500 hover:text-slate-700"
@@ -127,7 +127,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-4 lg:p-8">
+                <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-8">
                     {children}
                 </main>
             </div>

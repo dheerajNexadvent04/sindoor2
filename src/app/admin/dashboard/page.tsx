@@ -207,12 +207,12 @@ export default function AdminDashboard() {
     }, [supabase]);
 
     if (loading) {
-        return <div className="rounded-[28px] border border-red-100 bg-white p-10 text-center text-slate-500 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">Loading dashboard stats...</div>;
+        return <div className="rounded-2xl sm:rounded-[28px] border border-red-100 bg-white p-6 sm:p-10 text-center text-slate-500 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">Loading dashboard stats...</div>;
     }
 
     if (accessDenied) {
         return (
-            <div className="rounded-[28px] border border-red-200 bg-red-50 p-10 text-center shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+            <div className="rounded-2xl sm:rounded-[28px] border border-red-200 bg-red-50 p-6 sm:p-10 text-center shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
                 <h2 className="text-2xl font-bold text-red-700">Access Denied</h2>
                 <p className="mt-3 text-sm text-red-700">You are not authorized to view the admin dashboard.</p>
                 <div className="mt-6 flex justify-center gap-3">
@@ -235,9 +235,9 @@ export default function AdminDashboard() {
 
     return (
         <div>
-            <div className="mb-8 rounded-[30px] border border-red-100 bg-[linear-gradient(135deg,#fff8f7_0%,#fff_56%,#fff3ed_100%)] p-8 shadow-[0_18px_42px_rgba(227,30,36,0.08)]">
+            <div className="mb-6 sm:mb-8 rounded-2xl sm:rounded-[30px] border border-red-100 bg-[linear-gradient(135deg,#fff8f7_0%,#fff_56%,#fff3ed_100%)] p-4 sm:p-8 shadow-[0_18px_42px_rgba(227,30,36,0.08)]">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-red-500">Admin overview</p>
-                <h1 className="mt-3 text-3xl font-bold text-slate-900">Dashboard Overview</h1>
+                <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-slate-900">Dashboard Overview</h1>
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Track profile approvals, monitor account growth, and move between user operations with the same polished brand feel as the public website.</p>
             </div>
 
@@ -308,7 +308,7 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            <div className="rounded-[28px] border border-red-100 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+            <div className="rounded-2xl sm:rounded-[28px] border border-red-100 bg-white p-4 sm:p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
                 <h3 className="mb-4 text-lg font-bold text-gray-800">Quick Actions</h3>
                 <div className="flex flex-wrap gap-4">
                     <Link href="/admin/users" className="rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(227,30,36,0.22)] transition hover:bg-red-700">
@@ -318,7 +318,7 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            <div className="mt-8 rounded-[28px] border border-indigo-100 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+            <div className="mt-6 sm:mt-8 rounded-2xl sm:rounded-[28px] border border-indigo-100 bg-white p-4 sm:p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
                 <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-500">Automation Control</p>

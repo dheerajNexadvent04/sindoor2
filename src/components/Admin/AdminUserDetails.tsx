@@ -153,7 +153,7 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                     name={name}
                     value={formData[name] || ''}
                     onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded focus:ring-red-500 focus:border-red-500"
+                    className="h-11 w-full px-3 border border-gray-300 rounded-lg text-sm focus:ring-red-500 focus:border-red-500"
                 >
                     <option value="">Select</option>
                     {options.map((opt: string) => (
@@ -173,29 +173,34 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                     name={name}
                     value={formData[name] || ''}
                     onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded focus:ring-red-500 focus:border-red-500"
+                    className="h-11 w-full px-3 border border-gray-300 rounded-lg text-sm focus:ring-red-500 focus:border-red-500"
                 />
             )}
         </div>
     );
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 max-w-5xl mx-auto">
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-6 border-b pb-4">
+        <div className="bg-white rounded-2xl shadow-lg p-3 sm:p-6 max-w-5xl mx-auto">
+            <div className="flex flex-col gap-3 mb-5 border-b pb-4">
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2 leading-tight">
                     <User className="text-red-600" />
                     Edit User: {formData.first_name} {formData.last_name}
                 </h1>
-                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                     <Link
                         href={`/admin/users/${userId}/print`}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 w-full sm:w-auto"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 flex-1 sm:flex-none min-h-11"
                     >
                         <Printer size={16} />
                         Print Details
                     </Link>
-                    <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700 self-end sm:self-auto">
-                        <X />
+                    <button
+                        type="button"
+                        onClick={() => router.back()}
+                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-gray-500 hover:text-gray-700 hover:bg-slate-50"
+                        aria-label="Close"
+                    >
+                        <X size={22} />
                     </button>
                 </div>
             </div>
@@ -207,7 +212,7 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
             )}
 
             <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                     {/* Left Panel: Status & Photo */}
                     <div className="col-span-1 space-y-6">
                         <div className="bg-gray-50 p-4 rounded-lg border">
@@ -270,7 +275,7 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                     </div>
 
                     {/* Right Panel: Form Fields */}
-                    <div className="col-span-2 space-y-8">
+                    <div className="col-span-2 space-y-6 sm:space-y-8">
                         {/* Personal Info */}
                         <section>
                             <h3 className="text-lg font-semibold text-red-600 mb-4 flex items-center gap-2">
@@ -349,7 +354,7 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                                 name="about_me"
                                 value={formData.about_me}
                                 onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded h-24"
+                                className="w-full p-2 border border-gray-300 rounded h-24 text-sm"
                             />
                         </section>
 
@@ -358,14 +363,14 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="px-6 py-2 border rounded text-gray-700 hover:bg-gray-50 w-full sm:w-auto"
+                                className="px-6 py-2.5 border rounded text-gray-700 hover:bg-gray-50 w-full sm:w-auto min-h-11"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 w-full sm:w-auto"
+                                className="px-6 py-2.5 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 w-full sm:w-auto min-h-11"
                             >
                                 {saving ? 'Saving...' : 'Save Changes'}
                             </button>

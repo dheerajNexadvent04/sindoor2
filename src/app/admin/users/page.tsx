@@ -97,11 +97,11 @@ export default function UserManagement() {
 
     return (
         <div className="overflow-x-hidden">
-            <div className="mb-6 rounded-[24px] border border-red-100 bg-[linear-gradient(135deg,#fff8f7_0%,#fff_56%,#fff4ef_100%)] p-5 shadow-[0_18px_42px_rgba(227,30,36,0.08)] md:mb-8 md:rounded-[30px] md:p-8">
+            <div className="mb-6 rounded-2xl border border-red-100 bg-[linear-gradient(135deg,#fff8f7_0%,#fff_56%,#fff4ef_100%)] p-4 shadow-[0_18px_42px_rgba(227,30,36,0.08)] md:mb-8 md:rounded-[30px] md:p-8">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-red-500">Profiles</p>
                 <div className="mt-3 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">User Management</h1>
+                        <h1 className="text-xl font-bold text-slate-900 md:text-3xl">User Management</h1>
                         <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Review profile quality, move applications across approval states, and open individual records for deeper edits.</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -127,7 +127,7 @@ export default function UserManagement() {
                 </div>
             </div>
 
-            <div className="overflow-hidden rounded-[28px] border border-red-100 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+            <div className="overflow-hidden rounded-2xl md:rounded-[28px] border border-red-100 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
                 {/* Search Bar */}
                 <div className="flex items-center gap-2 border-b border-red-50 bg-[#fffaf9] p-4 md:p-5">
                     <Search className="text-gray-400 w-5 h-5" />
@@ -222,14 +222,14 @@ export default function UserManagement() {
                 </div>
 
                 {/* Mobile Cards */}
-                <div className="md:hidden px-3 py-3 space-y-3">
+                <div className="md:hidden px-2.5 py-3 space-y-3">
                     {loading ? (
                         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-500">Loading users...</div>
                     ) : filteredUsers.length === 0 ? (
                         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-500">No users found.</div>
                     ) : (
                         filteredUsers.map((user) => (
-                            <article key={user.id} className="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+                            <article key={user.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
                                 <Link href={`/admin/users/${user.id}`} className="flex items-center gap-3">
                                     <div className="relative h-14 w-14 overflow-hidden rounded-2xl bg-gray-100 ring-1 ring-red-100">
                                         {user.photo_url ? (

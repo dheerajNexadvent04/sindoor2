@@ -95,13 +95,20 @@ export default function AdminPrintUserDetails({ userId }: { userId: string }) {
     const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
+        const QUERY_TIMEOUT_MS = 12000;
+
         const loadProfile = async () => {
             try {
-                const { data, error: profileError } = await supabase
+                const profilePromise = supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', userId)
                     .maybeSingle();
+                const timeoutPromise = new Promise<never>((_, reject) => {
+                    window.setTimeout(() => reject(new Error('Profile request timed out. Please retry.')), QUERY_TIMEOUT_MS);
+                });
+
+                const { data, error: profileError } = await Promise.race([profilePromise, timeoutPromise]);
 
                 if (profileError) throw profileError;
                 if (!data) throw new Error('Profile data not found.');

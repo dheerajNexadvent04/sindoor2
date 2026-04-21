@@ -50,14 +50,14 @@ export default function AdminManagementPanel() {
     };
 
     return (
-        <div className="rounded-[28px] border border-red-100 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+        <div className="rounded-2xl sm:rounded-[28px] border border-red-100 bg-white p-4 sm:p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-500">Admin Management</p>
-            <h3 className="mt-2 text-xl font-bold text-slate-900">Create / Assign Admin Login</h3>
+            <h3 className="mt-2 text-lg sm:text-xl font-bold text-slate-900">Create / Assign Admin Login</h3>
             <p className="mt-2 text-sm text-slate-600">
                 Add a new admin email and password. If the email already exists, password and role will be updated.
             </p>
 
-            <form className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-4" onSubmit={handleCreateAdmin}>
+            <form className="mt-5 grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-4" onSubmit={handleCreateAdmin}>
                 <input
                     type="email"
                     value={newAdminEmail}
