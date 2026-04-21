@@ -154,8 +154,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 } catch (signOutError) {
                     console.error("AuthProvider: failed to clear invalid session locally:", signOutError);
                 }
+                applySession(null);
+                return;
             }
-            applySession(null);
+            // Keep existing in-memory/cached session state for transient network or
+            // browser storage timing errors (common on mobile refresh).
         }
     };
 

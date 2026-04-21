@@ -330,7 +330,6 @@ const EditProfileForm = () => {
                 native_city: formData.native_city,
                 family_location: formData.family_location,
                 about_family: formData.about_family,
-                status: 'pending',
                 
                 // Ensure photos are included in final save
                 photo_url: photoUrl,

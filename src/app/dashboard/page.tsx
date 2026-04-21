@@ -191,12 +191,21 @@ export default function Dashboard() {
             }
 
             if (!loading) {
-                const { data: { session } } = await supabase.auth.getSession();
+                let restoredUserId: string | null = null;
 
-                if (session?.user?.id) {
+                for (let attempt = 0; attempt < 3; attempt += 1) {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session?.user?.id) {
+                        restoredUserId = session.user.id;
+                        break;
+                    }
+                    await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
+                }
+
+                if (restoredUserId) {
                     await refreshSession();
                     setAuthChecked(true);
-                    await fetchDashboardData(session.user.id);
+                    await fetchDashboardData(restoredUserId);
                     return;
                 }
 
@@ -228,7 +237,7 @@ export default function Dashboard() {
     }, [user?.id, fetchDashboardData]);
 
     const resolvedProfile = profile || authProfile;
-    const isApprovedProfile = profile?.status === 'approved';
+    const isApprovedProfile = resolvedProfile?.status === 'approved';
     const displayName = resolvedProfile
         ? `${resolvedProfile.first_name || ''} ${resolvedProfile.last_name || ''}`.trim() || 'Valued Member'
         : user?.email?.split('@')[0] || 'My Account';
