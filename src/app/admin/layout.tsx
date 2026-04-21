@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (isPrintRoute) {
         return (
             <div className="bg-white">
-                <main className="p-4 lg:p-8">
+                <main className="p-4 lg:p-8 print:p-0">
                     {children}
                 </main>
             </div>

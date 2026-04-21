@@ -163,6 +163,9 @@
     line-height: 1.5;
     text-decoration: none;
     display: block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .separator {
@@ -220,5 +223,48 @@
 
     .infoSide {
         padding: 25px;
+    }
+
+    .infoItem {
+        gap: 14px;
+    }
+
+    .infoTitle {
+        font-size: 1.05rem;
+        margin-bottom: 20px;
+    }
+
+    .infoContent h4 {
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+    }
+
+    .infoContent p,
+    .infoContent a {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+}
+
+@media (max-width: 420px) {
+    .section {
+        padding: 28px 12px;
+    }
+
+    .formSide,
+    .infoSide {
+        padding: 18px;
+        border-radius: 14px;
+    }
+
+    .iconCircle {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+    }
+
+    .infoContent p,
+    .infoContent a {
+        font-size: 0.86rem;
     }
 }

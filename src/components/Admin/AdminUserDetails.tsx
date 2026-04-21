@@ -180,21 +180,21 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
     );
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto">
-            <div className="flex justify-between items-center mb-6 border-b pb-4">
-                <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 max-w-5xl mx-auto">
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-6 border-b pb-4">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2 leading-tight">
                     <User className="text-red-600" />
                     Edit User: {formData.first_name} {formData.last_name}
                 </h1>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     <Link
                         href={`/admin/users/${userId}/print`}
-                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 w-full sm:w-auto"
                     >
                         <Printer size={16} />
                         Print Details
                     </Link>
-                    <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700">
+                    <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700 self-end sm:self-auto">
                         <X />
                     </button>
                 </div>
@@ -229,7 +229,7 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                         </div>
 
                         <div className="text-center">
-                            <div className="relative w-48 h-48 mx-auto rounded-lg overflow-hidden border-2 border-gray-200 mb-2">
+                            <div className="relative w-36 h-36 sm:w-48 sm:h-48 mx-auto rounded-lg overflow-hidden border-2 border-gray-200 mb-2">
                                 {photoUrl ? (
                                     <Image src={photoUrl} alt="Profile" fill className="object-cover" unoptimized />
                                 ) : (
@@ -276,7 +276,7 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                             <h3 className="text-lg font-semibold text-red-600 mb-4 flex items-center gap-2">
                                 <User size={20} /> Personal Info
                             </h3>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <InputGroup label="First Name" name="first_name" />
                                 <InputGroup label="Last Name" name="last_name" />
                                 <InputGroup label="Date of Birth" name="dob" type="date" />
@@ -296,7 +296,7 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                             <h3 className="text-lg font-semibold text-red-600 mb-4 flex items-center gap-2">
                                 <Users size={20} /> Religion & Community
                             </h3>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <InputGroup label="Religion" name="religion_name" options={['Hindu', 'Sikh', 'Christian', 'Jain', 'Other']} />
                                 <InputGroup label="Caste" name="caste_name" />
                                 <InputGroup label="Sub Caste" name="sub_caste_name" />
@@ -309,7 +309,7 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                             <h3 className="text-lg font-semibold text-red-600 mb-4 flex items-center gap-2">
                                 <Users size={20} /> Family Details
                             </h3>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <InputGroup label="Family Type" name="family_type" options={['Nuclear', 'Joint']} />
                                 <InputGroup label="Father's Occ." name="father_occupation" />
                                 <InputGroup label="Mother's Occ." name="mother_occupation" />
@@ -322,7 +322,7 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                             <h3 className="text-lg font-semibold text-red-600 mb-4 flex items-center gap-2">
                                 <GraduationCap size={20} /> Education & Career
                             </h3>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <InputGroup label="Degree" name="degree" />
                                 <InputGroup label="Employed In" name="employed_in" options={['Private', 'Government', 'Business', 'Self-Employed']} />
                                 <InputGroup label="Occupation" name="occupation" />
@@ -335,7 +335,7 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                             <h3 className="text-lg font-semibold text-red-600 mb-4 flex items-center gap-2">
                                 <Users size={20} /> Location
                             </h3>
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <InputGroup label="City" name="city" />
                                 <InputGroup label="State" name="state" />
                                 <InputGroup label="Country" name="country" />
@@ -354,18 +354,18 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                         </section>
 
                         {/* Submit */}
-                        <div className="pt-4 border-t flex justify-end gap-4">
+                        <div className="pt-4 border-t flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4">
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="px-6 py-2 border rounded text-gray-700 hover:bg-gray-50"
+                                className="px-6 py-2 border rounded text-gray-700 hover:bg-gray-50 w-full sm:w-auto"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                                className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 w-full sm:w-auto"
                             >
                                 {saving ? 'Saving...' : 'Save Changes'}
                             </button>

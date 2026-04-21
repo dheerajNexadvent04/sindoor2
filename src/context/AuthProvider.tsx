@@ -239,9 +239,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         getInitialSession();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            (_event, session) => {
+            (event, session) => {
                 applySession(session);
                 setLoading(false);
+
+                if (event === 'PASSWORD_RECOVERY' && typeof window !== 'undefined' && window.location.pathname !== '/update-password') {
+                    window.location.assign(`/update-password${window.location.search}${window.location.hash}`);
+                }
             }
         );
 

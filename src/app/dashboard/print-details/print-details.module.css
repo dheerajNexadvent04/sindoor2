@@ -9,6 +9,14 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    flex-wrap: wrap;
+}
+
+.toolbarActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .pageTitle {
@@ -140,6 +148,9 @@
     line-height: 1.35;
     display: grid;
     gap: 3px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .grid p span,
@@ -207,27 +218,81 @@
 @media (max-width: 768px) {
     .toolbar {
         margin-top: -6px;
+        align-items: flex-start;
+    }
+
+    .toolbarActions {
+        width: 100%;
     }
 
     .printButton {
         height: 40px;
         padding: 0 14px;
+        font-size: 0.92rem;
+    }
+}
+
+@media (max-width: 750px) {
+    .pageTitle {
+        font-size: 1.2rem;
+    }
+
+    .toolbar {
+        gap: 10px;
+    }
+
+    .toolbarActions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .printButton {
+        width: 100%;
+        justify-content: center;
+        white-space: normal;
+        min-height: 42px;
+        line-height: 1.15;
+        text-align: center;
+    }
+
+    .previewSheet {
+        padding: 14px;
+        border-radius: 14px;
+    }
+}
+
+@media (max-width: 420px) {
+    .toolbarActions {
+        grid-template-columns: 1fr;
     }
 }
 
 @media print {
+    :global(html),
+    :global(body) {
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
     .hideInPrint {
         display: none !important;
     }
 
     @page {
         size: A4 portrait;
-        margin: 8mm;
+        margin: 6mm;
     }
 
     .page {
         display: block;
         gap: 0;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .toolbar {
@@ -236,10 +301,12 @@
 
     .previewSheet {
         width: 100%;
+        max-width: none;
         box-shadow: none;
         border: none;
         border-radius: 0;
-        padding: 6mm 0 6px;
+        margin: 0 !important;
+        padding: 5mm 5mm 4mm;
         border-bottom: 3px solid var(--primary-red);
     }
 
@@ -254,8 +321,12 @@
         align-items: center;
     }
 
+    .brandBlock,
     .headerSummary {
         min-width: 0;
+    }
+
+    .headerSummary {
         gap: 8px;
     }
 

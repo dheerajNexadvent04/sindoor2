@@ -1,6 +1,8 @@
 /* Edit Profile Styles */
 .container {
     padding: 30px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .header {
@@ -171,6 +173,9 @@
     color: #333;
     outline: none;
     transition: border-color 0.2s;
+    width: 100%;
+    min-height: 44px;
+    box-sizing: border-box;
 }
 
 .input:focus,
@@ -236,17 +241,44 @@
 }
 
 @media (max-width: 768px) {
+    .container {
+        padding: 16px;
+    }
+
+    .header {
+        padding: 16px;
+        margin-bottom: 18px;
+    }
+
+    .title {
+        font-size: 1.1rem;
+        line-height: 1.2;
+    }
+
+    .section {
+        padding: 18px;
+        margin-bottom: 18px;
+    }
+
+    .sectionTitle {
+        margin-bottom: 18px;
+    }
+
     .formGrid {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
 
     .fieldsGrid {
         grid-template-columns: 1fr;
+        gap: 14px;
     }
 
     .photoColumn {
-        flex-direction: row;
+        flex-direction: column;
         justify-content: center;
+        align-items: center;
+        gap: 12px;
     }
 
     .profileImage {
@@ -257,6 +289,90 @@
     .imageWrapper {
         width: 100px;
         height: 100px;
+    }
+
+    .changePhotoBtn {
+        font-size: 0.95rem;
+        padding: 10px 16px;
+    }
+
+    .label {
+        font-size: 0.95rem;
+    }
+
+    .input,
+    .select {
+        font-size: 0.97rem;
+    }
+
+    .radioGroup {
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .footerActions {
+        justify-content: stretch;
+        gap: 10px;
+    }
+
+    .cancelBtn,
+    .saveBtn {
+        flex: 1;
+        min-height: 46px;
+        font-size: 0.98rem;
+        padding: 10px 14px;
+    }
+}
+
+@media (max-width: 750px) {
+    .fieldsGrid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 12px;
+    }
+
+    .header {
+        padding: 14px;
+    }
+
+    .title {
+        font-size: 1rem;
+    }
+
+    .closeBtn {
+        width: 34px;
+        height: 34px;
+    }
+
+    .section {
+        padding: 14px;
+        border-radius: 10px;
+    }
+
+    .sectionTitle {
+        font-size: 1rem;
+    }
+
+    .formGroup {
+        gap: 6px;
+    }
+
+    .footerActions {
+        flex-direction: column;
+    }
+
+    .cancelBtn,
+    .saveBtn {
+        width: 100%;
+    }
+
+    .photoHint {
+        font-size: 0.85rem;
+        line-height: 1.4;
     }
 }
 

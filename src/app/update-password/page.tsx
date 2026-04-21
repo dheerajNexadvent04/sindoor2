@@ -19,19 +19,109 @@ export default function UpdatePassword() {
 
     useEffect(() => {
         const bootstrapRecoverySession = async () => {
-            const urlError = new URLSearchParams(window.location.search).get('error');
+            const params = new URLSearchParams(window.location.search);
+            const urlError = params.get('error') || params.get('error_description');
             if (urlError) {
                 setError(urlError);
                 return;
             }
 
-            const { data, error: sessionError } = await supabase.auth.getSession();
+            const code = params.get('code');
+            const tokenHash = params.get('token_hash');
+            const tokenType = params.get('type');
+            if (code) {
+                const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+                if (exchangeError) {
+                    if (/pkce code verifier not found/i.test(exchangeError.message)) {
+                        setError('Reset link is tied to a different browser session. Please open the latest reset link in the same browser where you requested it, or request a new link and open it here.');
+                    } else {
+                        setError(exchangeError.message);
+                    }
+                    return;
+                }
+
+                const cleanedParams = new URLSearchParams(window.location.search);
+                cleanedParams.delete('code');
+                cleanedParams.delete('type');
+                cleanedParams.delete('next');
+                cleanedParams.delete('error');
+                cleanedParams.delete('error_description');
+                const cleanedQuery = cleanedParams.toString();
+                window.history.replaceState(
+                    {},
+                    document.title,
+                    `${window.location.pathname}${cleanedQuery ? `?${cleanedQuery}` : ''}${window.location.hash}`
+                );
+            }
+
+            if (!code && tokenHash && tokenType) {
+                const { error: verifyError } = await supabase.auth.verifyOtp({
+                    token_hash: tokenHash,
+                    type: tokenType as 'recovery',
+                });
+
+                if (verifyError) {
+                    setError(verifyError.message);
+                    return;
+                }
+
+                const cleanedParams = new URLSearchParams(window.location.search);
+                cleanedParams.delete('token_hash');
+                cleanedParams.delete('type');
+                cleanedParams.delete('next');
+                cleanedParams.delete('error');
+                cleanedParams.delete('error_description');
+                const cleanedQuery = cleanedParams.toString();
+                window.history.replaceState(
+                    {},
+                    document.title,
+                    `${window.location.pathname}${cleanedQuery ? `?${cleanedQuery}` : ''}${window.location.hash}`
+                );
+            }
+
+            const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+            const accessToken = hashParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token');
+
+            if (accessToken && refreshToken) {
+                const { error: setSessionError } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                });
+
+                if (setSessionError) {
+                    setError(setSessionError.message);
+                    return;
+                }
+
+                // Remove tokens from URL after consuming them.
+                window.history.replaceState({}, document.title, `${window.location.pathname}${window.location.search}`);
+            }
+
+            let recoveredSession = null;
+            let sessionError: Error | null = null;
+
+            for (let attempt = 0; attempt < 5; attempt += 1) {
+                const { data, error } = await supabase.auth.getSession();
+                if (error) {
+                    sessionError = error;
+                    break;
+                }
+
+                if (data.session?.user) {
+                    recoveredSession = data.session;
+                    break;
+                }
+
+                await new Promise((resolve) => setTimeout(resolve, 250));
+            }
+
             if (sessionError) {
                 setError(sessionError.message);
                 return;
             }
 
-            if (!data.session?.user) {
+            if (!recoveredSession?.user) {
                 setError('Reset link is invalid or expired. Please request a new reset link.');
                 return;
             }
@@ -138,8 +228,8 @@ export default function UpdatePassword() {
                         </div>
                     </div>
 
-                    <button type="submit" className={styles.button} disabled={loading}>
-                        {loading ? 'Updating...' : 'Update Password'}
+                    <button type="submit" className={styles.button} disabled={loading || !sessionReady}>
+                        {loading ? 'Updating...' : sessionReady ? 'Update Password' : 'Preparing secure reset session...'}
                     </button>
                 </form>
                 {!sessionReady && !error && (

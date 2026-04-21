@@ -173,7 +173,7 @@ export default function AdminPrintUserDetails({ userId }: { userId: string }) {
         <div className={styles.page}>
             <div className={styles.toolbar}>
                 <h1 className={styles.pageTitle}>Admin Print Details</h1>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div className={styles.toolbarActions}>
                     <Link
                         href={`/admin/users/${userId}`}
                         className={styles.printButton}
