@@ -15,10 +15,14 @@ const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [hasMounted, setHasMounted] = useState(false);
     const pathname = usePathname();
-    const isAuthenticated = Boolean((session?.user || user) && (!profileChecked || profile?.id));
+    const isAuthenticated = Boolean(session?.user || user);
 
     useEffect(() => {
-        setHasMounted(true);
+        const timeoutId = window.setTimeout(() => {
+            setHasMounted(true);
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, []);
 
     const toggleMobileMenu = () => {
@@ -50,13 +54,15 @@ const Navbar = () => {
         : ((session?.user?.email || user?.email)?.split('@')[0] || 'My Account');
     const primaryPhoto = profile?.photo_url || profile?.photos?.[0] || null;
 
-    const normalizedStatus = profile?.status === 'approved'
-        ? 'Approved'
-        : profile?.status === 'pending'
-            ? 'Pending'
-            : profile?.status
-                ? 'Disabled'
-                : 'Pending';
+    const normalizedStatus = !profileChecked
+        ? 'Loading...'
+        : profile?.status === 'approved'
+            ? 'Approved'
+            : profile?.status === 'pending'
+                ? 'Pending'
+                : profile?.status
+                    ? 'Disabled'
+                    : 'Member';
 
     const statusClassName = normalizedStatus === 'Approved'
         ? styles.statusApproved

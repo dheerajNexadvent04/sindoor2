@@ -2,7 +2,6 @@ import styles from "./page.module.css";
 // import Navbar from "@/components/Navbar/Navbar"; // Removed to fix duplication
 import Hero from "@/components/Hero/Hero";
 import HowItWorks from "@/components/HowItWorks/HowItWorks";
-import WhyChooseUs from "@/components/WhyChooseUs/WhyChooseUs";
 import Testimonials from "@/components/Testimonials/Testimonials";
 import StatsOfUs from "@/components/StatsOfUs/StatsOfUs";
 import OwnerSection from "@/components/OwnerSection/OwnerSection";

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 
@@ -21,19 +21,6 @@ const USER_CACHE_KEY = 'sindoor_auth_user';
 type CachedUser = {
     id: string;
     email: string | null;
-};
-
-const readCachedProfile = (): UserProfile | null => {
-    if (typeof window === 'undefined') return null;
-
-    try {
-        const rawProfile = window.localStorage.getItem(PROFILE_CACHE_KEY);
-        if (!rawProfile) return null;
-        return JSON.parse(rawProfile) as UserProfile;
-    } catch (error) {
-        console.error('AuthProvider: failed to read cached profile', error);
-        return null;
-    }
 };
 
 const writeCachedProfile = (profile: UserProfile | null) => {
@@ -118,51 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [profileChecked, setProfileChecked] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    const applySession = (nextSession: Session | null) => {
-        setSession(nextSession);
-        setUser(nextSession?.user ?? null);
-
-        if (nextSession?.user) {
-            setProfileChecked(false);
-            writeCachedUser({
-                id: nextSession.user.id,
-                email: nextSession.user.email ?? null,
-            });
-            const cachedProfile = readCachedProfile();
-            if (cachedProfile && cachedProfile.id === nextSession.user.id) {
-                setProfile(cachedProfile);
-                setProfileChecked(true);
-            }
-            void fetchProfile(nextSession.user.id);
-        } else {
-            setProfile(null);
-            setProfileChecked(true);
-            writeCachedProfile(null);
-            writeCachedUser(null);
-        }
-    };
-
-    const syncAuthState = async () => {
-        try {
-            const { data: { session: localSession } } = await supabase.auth.getSession();
-            applySession(localSession ?? null);
-        } catch (error) {
-            console.error("AuthProvider: syncAuthState error:", error);
-            if (isInvalidRefreshTokenError(error)) {
-                try {
-                    await supabase.auth.signOut({ scope: 'local' });
-                } catch (signOutError) {
-                    console.error("AuthProvider: failed to clear invalid session locally:", signOutError);
-                }
-                applySession(null);
-                return;
-            }
-            // Keep existing in-memory/cached session state for transient network or
-            // browser storage timing errors (common on mobile refresh).
-        }
-    };
-
-    const fetchProfile = async (userId: string) => {
+    const fetchProfile = useCallback(async (userId: string) => {
         let lastError: unknown = null;
 
         for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -184,13 +127,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     return;
                 }
 
-                const cachedProfile = readCachedProfile();
-                if (cachedProfile?.id === userId) {
-                    setProfile(cachedProfile);
-                    setProfileChecked(true);
-                    return;
-                }
-
                 setProfile(null);
                 writeCachedProfile(null);
                 setProfileChecked(true);
@@ -206,27 +142,67 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
         }
 
-        const cachedProfile = readCachedProfile();
-        if (cachedProfile?.id === userId) {
-            setProfile(cachedProfile);
-            setProfileChecked(true);
-            return;
-        }
-
         setProfileChecked(true);
         console.error("AuthProvider: profile fetch failed after retries:", lastError);
-    };
+    }, []);
+
+    const applySession = useCallback((nextSession: Session | null) => {
+        setSession(nextSession);
+        setUser(nextSession?.user ?? null);
+
+        if (nextSession?.user) {
+            setProfileChecked(false);
+            writeCachedUser({
+                id: nextSession.user.id,
+                email: nextSession.user.email ?? null,
+            });
+            void fetchProfile(nextSession.user.id);
+        } else {
+            setProfile(null);
+            setProfileChecked(true);
+            writeCachedProfile(null);
+            writeCachedUser(null);
+        }
+    }, [fetchProfile]);
+
+    const syncAuthState = useCallback(async () => {
+        try {
+            let resolvedSession: Session | null = null;
+
+            for (let attempt = 0; attempt < 3; attempt += 1) {
+                const { data: { session: localSession } } = await supabase.auth.getSession();
+                if (localSession?.user) {
+                    resolvedSession = localSession;
+                    break;
+                }
+
+                if (attempt < 2) {
+                    await wait(250 * (attempt + 1));
+                }
+            }
+
+            applySession(resolvedSession);
+        } catch (error) {
+            console.error("AuthProvider: syncAuthState error:", error);
+            if (isInvalidRefreshTokenError(error)) {
+                try {
+                    await supabase.auth.signOut({ scope: 'local' });
+                } catch (signOutError) {
+                    console.error("AuthProvider: failed to clear invalid session locally:", signOutError);
+                }
+                applySession(null);
+                return;
+            }
+            // Keep existing in-memory/cached session state for transient network or
+            // browser storage timing errors (common on mobile refresh).
+        }
+    }, [applySession]);
 
     useEffect(() => {
         const cachedUser = readCachedUser();
-        const cachedProfile = readCachedProfile();
 
         if (cachedUser) {
             setUser({ id: cachedUser.id, email: cachedUser.email } as User);
-        }
-        if (cachedProfile && (!cachedUser || cachedProfile.id === cachedUser.id)) {
-            setProfile(cachedProfile);
-            setProfileChecked(true);
         }
 
         const getInitialSession = async () => {
@@ -272,17 +248,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             window.removeEventListener('pageshow', onPageShow);
             document.removeEventListener('visibilitychange', onVisibilityChange);
         };
-    }, []);
+    }, [syncAuthState, applySession]);
 
-    const refreshSession = async () => {
+    const refreshSession = useCallback(async () => {
         try {
             await syncAuthState();
         } catch (error) {
             console.error("AuthProvider: refreshSession error:", error);
         }
-    };
+    }, [syncAuthState]);
 
-    const signOut = async () => {
+    const signOut = useCallback(async () => {
         setSession(null);
         setUser(null);
         setProfile(null);
@@ -291,7 +267,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         writeCachedProfile(null);
         writeCachedUser(null);
         await supabase.auth.signOut();
-    };
+    }, []);
 
     return (
         <AuthContext.Provider value={{ session, user, profile, profileChecked, loading, signOut, refreshSession }}>

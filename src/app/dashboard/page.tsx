@@ -241,13 +241,15 @@ export default function Dashboard() {
     const displayName = resolvedProfile
         ? `${resolvedProfile.first_name || ''} ${resolvedProfile.last_name || ''}`.trim() || 'Valued Member'
         : user?.email?.split('@')[0] || 'My Account';
-    const normalizedStatus = resolvedProfile?.status === 'approved'
-        ? 'Approved'
-        : resolvedProfile?.status === 'pending'
-            ? 'Pending'
-            : resolvedProfile?.status
-                ? 'Disabled'
-                : 'Pending';
+    const normalizedStatus = !resolvedProfile
+        ? 'Loading...'
+        : resolvedProfile.status === 'approved'
+            ? 'Approved'
+            : resolvedProfile.status === 'pending'
+                ? 'Pending'
+                : resolvedProfile.status
+                    ? 'Disabled'
+                    : 'Member';
 
     const statusClassName = normalizedStatus === 'Approved'
         ? styles.statusApproved

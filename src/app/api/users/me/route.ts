@@ -89,7 +89,6 @@ export async function PUT(request: Request) {
             .from('profiles')
             .update({
                 ...validatedData,
-                status: 'pending', // Send back to admin queue on update
                 updated_at: new Date().toISOString()
             })
             .eq('id', user.id)
